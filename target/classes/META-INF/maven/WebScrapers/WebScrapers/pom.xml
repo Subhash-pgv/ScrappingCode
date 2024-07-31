@@ -82,11 +82,14 @@
             <goals>
               <goal>java</goal>
             </goals>
-            <phase>verify</phase>
+            <phase>test</phase>
           </execution>
         </executions>
         <configuration>
-          <mainClass>WebScrapers.JobScrapping2</mainClass>
+         <mainClass>WebScrapers.JobScrapping2</mainClass>
+        <includeClasspath>true</includeClasspath>
+        <!-- Specify classpath for test sources -->
+        <includeTestClasspath>true</includeTestClasspath>
         </configuration>
       </plugin>
       <plugin>
