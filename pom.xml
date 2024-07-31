@@ -83,11 +83,6 @@
           <goals>
             <goal>java</goal>
           </goals>
-<<<<<<< HEAD
-         
-=======
-        
->>>>>>> 96369f289a643d4a9901cda2242651136d617c78
         </execution>
       </executions>
       <configuration>
