@@ -83,7 +83,7 @@
           <goals>
             <goal>java</goal>
           </goals>
-          <phase>compile</phase>
+        
         </execution>
       </executions>
       <configuration>
