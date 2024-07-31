@@ -129,6 +129,7 @@ public class JobScrapping2 {
                 System.out.println(totalJobsAppended + " jobs added to DB successfully.");
             } else {
                 System.out.println("No new jobs found");
+                System.out.println("No new jobs found");
             }
         }
         
