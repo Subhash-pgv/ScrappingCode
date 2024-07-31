@@ -83,11 +83,11 @@
           <goals>
             <goal>java</goal>
           </goals>
-          <phase>compile</phase>
+         
         </execution>
       </executions>
       <configuration>
-        <mainClass>WebScrapers.JobScrapping2</mainClass>
+        <mainClass>WebScrapers.MainCoordinator</mainClass>
       </configuration>
     </plugin>
   </plugins>
