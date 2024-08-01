@@ -71,9 +71,7 @@ public class JobScrapping2 {
         	List<WebElement> resultCountElement = driver.findElements(By.xpath("//section[@id='category-" + sectionId + "']//li/a//span[@class='title']"));
    
         	for (int i = 1; i <= resultCountElement.size(); i++) {
-        		LocalDateTime now = LocalDateTime.now();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        
+        		
                 String companyName = null;
                 String jobTitle = null;
                 String jobLocation = null;
@@ -120,7 +118,9 @@ public class JobScrapping2 {
 					companyWebsite = CompanyWebsites.getAttribute("href");
                 }
 				
-			    dateCreated = now.format(formatter);
+				LocalDateTime now = LocalDateTime.now();
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+				dateCreated = now.format(formatter);
                 
                 
              // Check if job URL already exists
