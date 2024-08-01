@@ -1,6 +1,7 @@
 package WebScrapers;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -25,18 +26,20 @@ public class JobScrapping1 {
 			throws IOException, InterruptedException, SQLException, ClassNotFoundException {
 
 		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--headless");
-		options.addArguments("--window-size=1920x1080");
-		options.addArguments("--disable-gpu");
+//		options.addArguments("--headless");
+//		options.addArguments("--window-size=1920x1080");
+//		options.addArguments("--disable-gpu");
 		WebDriver driver = new ChromeDriver(options);
 		Actions actions = new Actions(driver);
 
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        
 		driver.get("https://account.ycombinator.com/?continue=https%3A%2F%2Fwww.workatastartup.com%2F");
 		driver.manage().window().maximize();
 		sleepRandom();
 
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-
+	     
 		// sql connection set up
 		Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 
@@ -44,9 +47,11 @@ public class JobScrapping1 {
 
 		Connection connection = DriverManager.getConnection(connectionURL);
 
-		String insertSQL = "INSERT INTO jobListings (jobTitle, jobLocation, jobUrl, companyName) VALUES (?, ?, ?, ?)";
+		String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocation, jobUrl, companyName,employeeCount,companyWebsite,source,dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 		String checkSQL = "SELECT COUNT(*) FROM jobListings WHERE jobUrl = ?";
 
+	
+		
 		wait.until(ExpectedConditions
 				.presenceOfElementLocated(By.xpath("(//div[@class='MuiFormControl-root input-group'])[1]")));
 
@@ -57,28 +62,40 @@ public class JobScrapping1 {
 
 		driver.findElement(By.xpath("//input[@id='password-input']")).sendKeys("ABCD@1432");
 		driver.findElement(By.xpath("//span[@class='MuiButton-label']")).click();
+		sleepRandom();
+		
+		// Open a new tab with searchparameters link
+		 String URL ="https://www.workatastartup.com/companies?companySize=seed&companySize=small&demographic=any&hasEquity=any&hasSalary=any&industry=any&interviewProcess=any&jobType=any&layout=list-compact&locations=US&locations=GB&locations=AU&locations=AT&locations=BE&locations=BG&locations=HR&locations=CY&locations=CZ&locations=DK&locations=FI&locations=FR&locations=DE&locations=GR&locations=HU&locations=IT&locations=MT&locations=NL&role=eng&sortBy=created_desc&tab=any&usVisaNotRequired=any";
+		 String script = "window.open(arguments[0], '_blank');";
+	     js.executeScript(script, URL);
+	     sleepRandom();
+	    
+	     
+	     List<String> tabs = new ArrayList<>(driver.getWindowHandles());
+	     driver.switchTo().window(tabs.get(1));
+	     
 
-		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@id='role']//div[text()='Any']")))
-				.click();
-
-		driver.findElement(By.xpath("//div[@id='react-select-2-option-1']")).click();
-
-		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@id='companySize']//div[text()='Any']")))
-				.click();
-
-		driver.findElement(By.xpath("//div[@id='react-select-4-option-1']")).click();
-
-		wait.until(ExpectedConditions
-				.presenceOfElementLocated(By.xpath("//div[@id='companySize']//div[contains(text(),'1 - 10 people')]")))
-				.click();
-
-		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@id='react-select-4-option-2']")))
-				.click();
-
-		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[contains(text(),'Select...')]")))
-				.click();
-
-		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[.='Remote only']"))).click();
+//		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@id='role']//div[text()='Any']")))
+//				.click();
+//
+//		driver.findElement(By.xpath("//div[@id='react-select-2-option-1']")).click();
+//
+//		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@id='companySize']//div[text()='Any']")))
+//				.click();
+//
+//		driver.findElement(By.xpath("//div[@id='react-select-4-option-1']")).click();
+//
+//		wait.until(ExpectedConditions
+//				.presenceOfElementLocated(By.xpath("//div[@id='companySize']//div[contains(text(),'1 - 10 people')]")))
+//				.click();
+//
+//		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@id='react-select-4-option-2']")))
+//				.click();
+//
+//		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[contains(text(),'Select...')]")))
+//				.click();
+//
+//		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[.='Remote only']"))).click();
 
 		Thread.sleep(5000);
 		WebElement resultCountElement = driver
@@ -90,6 +107,10 @@ public class JobScrapping1 {
 		// Total number of comapnies
 		int totalmatchings = Integer.parseInt(numberStr);
 		int totalJobsAppended=0;
+		 String employeeCount=null;
+         String companyWebsite= null;
+         String source= "workatastartup.com";
+         String dateCreated = null;
 
 		try {
 			System.out.println("Adding JObs to DB please wait untill it shows completed.....");
@@ -101,9 +122,13 @@ public class JobScrapping1 {
 						.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpathExpression)));
 				jobListing.click();
 				sleepRandom();
-
-				List<String> tabs = new ArrayList<>(driver.getWindowHandles());
-				driver.switchTo().window(tabs.get(1));
+				 
+			
+		    List<String> tab = new ArrayList<>(driver.getWindowHandles());
+			sleepRandom();
+		    driver.switchTo().window(tab.get(2));
+		    
+				
 
 				wait.until(ExpectedConditions.presenceOfElementLocated(
 						By.xpath("//div[contains(@class,'justify-between sm:flex-row')]//div[@class='job-name']//a")));
@@ -125,6 +150,16 @@ public class JobScrapping1 {
 							.xpath("(//div[contains(@class,'justify-between sm:flex-row')]//div[@class='job-name']//a)["
 									+ j + "]"))
 							.getAttribute("href");
+					
+					companyWebsite = driver.findElement(By
+							.xpath("(//div[@class='text-sm'])[1]/div[1]/div/div[2]/a"))
+							.getAttribute("href");
+					
+					WebElement employeesElement = driver
+							.findElement(By.xpath("//i[contains(@title,'people')]/following-sibling::div"));
+					String employeeNumTExt = employeesElement.getText();
+					String[] splits = employeeNumTExt.split(" ");
+					employeeCount = splits[0].trim();
 
 					// Check if job URL already exists
 					PreparedStatement checkStatement = connection.prepareStatement(checkSQL);
@@ -137,6 +172,10 @@ public class JobScrapping1 {
 						insertStatement.setString(2, JobLocation);
 						insertStatement.setString(3, JobURL);
 						insertStatement.setString(4, companyName);
+					    insertStatement.setString(5, employeeCount);
+	                    insertStatement.setString(6, companyWebsite);
+	                    insertStatement.setString(7, source);
+	                    insertStatement.setString(8, dateCreated);
 						insertStatement.executeUpdate();
 						insertStatement.close();
 						
@@ -147,7 +186,7 @@ public class JobScrapping1 {
 					checkStatement.close();
 				}
 				driver.close();
-				driver.switchTo().window(tabs.get(0));
+				driver.switchTo().window(tab.get(1));
 
 				
 				if (i == totalmatchings) {
@@ -166,8 +205,8 @@ public class JobScrapping1 {
 			System.out.println("Code Not executed completely");
 			e.printStackTrace();
 		} finally {
-			driver.quit();
-			connection.close();
+		//	driver.quit();
+		//	connection.close();
 		}
 
 	}

@@ -1,6 +1,7 @@
 package WebScrapers;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -9,6 +10,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.interactions.Actions;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -27,13 +29,17 @@ public class JobScrapping2 {
     public static void main(String[] args) throws IOException, InterruptedException, SQLException, ClassNotFoundException {
 
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless");
-        options.addArguments("--window-size=1920x1080");
-        options.addArguments("--disable-gpu");
+//        options.addArguments("--headless");
+//        options.addArguments("--window-size=1920x1080");
+//        options.addArguments("--disable-gpu");
         WebDriver driver = new ChromeDriver(options);
         Actions actions = new Actions(driver);
+        
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        
+       
 
-        driver.get("https://weworkremotely.com/remote-jobs/search?search_uuid=&term=&sort=any_time&categories%5B%5D=2&categories%5B%5D=17&categories%5B%5D=18");
+        driver.get("https://weworkremotely.com/remote-jobs/search?search_uuid=&term=&sort=any_time&categories%5B%5D=2&categories%5B%5D=17&categories%5B%5D=18&region%5B%5D=1&region%5B%5D=5&region%5B%5D=6&region%5B%5D=7&company_size%5B%5D=1+-+10&company_size%5B%5D=11+-+50");
         driver.manage().window().maximize();
         sleepRandom();
 
@@ -45,8 +51,8 @@ public class JobScrapping2 {
 		String connectionURL = "jdbc:sqlserver://10.0.2.34:1433;Database=Automation;User=mailscan;Password=MailScan@343260;encrypt=true;trustServerCertificate=true";
 
 		Connection connection = DriverManager.getConnection(connectionURL);
-		
-	   String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocation, jobUrl, companyName) VALUES (?, ?, ?, ?)";
+		// company web site, source, date time, emp count ,
+	   String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocation, jobUrl, companyName,employeeCount,companyWebsite,source,dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
        String checkSQL = "SELECT COUNT(*) FROM jobListings WHERE jobUrl = ?";
    
        
@@ -65,11 +71,18 @@ public class JobScrapping2 {
         	List<WebElement> resultCountElement = driver.findElements(By.xpath("//section[@id='category-" + sectionId + "']//li/a//span[@class='title']"));
    
         	for (int i = 1; i <= resultCountElement.size(); i++) {
+        		LocalDateTime now = LocalDateTime.now();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         
-                String companyName = "";
-                String jobTitle = "";
-                String jobLocation = "";
-                String jobURL = "";
+                String companyName = null;
+                String jobTitle = null;
+                String jobLocation = null;
+                String jobURL = null;
+                String employeeCount=null;
+                String companyWebsite= null;
+                String source= "weworkremotely.com";
+                String dateCreated = null;
+                
 
                 // Handle each element and check if it exists
                 WebElement companyNames = getElementIfExists(driver, "(//section[@id='category-" + sectionId + "']//li[" + i + "]/a//span[@class='company'][1])");
@@ -94,6 +107,20 @@ public class JobScrapping2 {
                     jobURL = jobURLs.getAttribute("href");
                 }
                 
+		        String script = "window.open(arguments[0], '_blank');";
+		        js.executeScript(script, jobURL);
+		        sleepRandom();
+
+				List<String> tabs = new ArrayList<>(driver.getWindowHandles());
+				driver.switchTo().window(tabs.get(1));
+				
+				
+				WebElement CompanyWebsites  = getElementIfExists(driver, "//div[@class='company-card border-box']//a[normalize-space()='Website']");
+				if (CompanyWebsites != null) {
+					companyWebsite = CompanyWebsites.getAttribute("href");
+                }
+				
+			    dateCreated = now.format(formatter);
                 
                 
              // Check if job URL already exists
@@ -107,15 +134,24 @@ public class JobScrapping2 {
                     insertStatement.setString(2, jobLocation);
                     insertStatement.setString(3, jobURL);
                     insertStatement.setString(4, companyName);
+                    insertStatement.setString(5, employeeCount);
+                    insertStatement.setString(6, companyWebsite);
+                    insertStatement.setString(7, source);
+                    insertStatement.setString(8, dateCreated);
+                    
                     insertStatement.executeUpdate();
                     insertStatement.close();
                     
                     totalJobsAppended++;
+                    
                 }
                 
                 totalJobFinds++;
                 resultSet.close();
                 checkStatement.close();
+
+                driver.close();
+				driver.switchTo().window(tabs.get(0));
     
             }
         }
@@ -133,8 +169,8 @@ public class JobScrapping2 {
             }
         }
         
-        driver.quit(); // Make sure to quit the WebDriver
-        connection.close();
+      //  driver.quit(); // Make sure to quit the WebDriver
+       // connection.close();
     }
 
     private static WebElement getElementIfExists(WebDriver driver, String xpath) {
