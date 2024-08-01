@@ -29,9 +29,9 @@ public class JobScrapping2 {
     public static void main(String[] args) throws IOException, InterruptedException, SQLException, ClassNotFoundException {
 
         ChromeOptions options = new ChromeOptions();
-//        options.addArguments("--headless");
-//        options.addArguments("--window-size=1920x1080");
-//        options.addArguments("--disable-gpu");
+        options.addArguments("--headless");
+        options.addArguments("--window-size=1920x1080");
+        options.addArguments("--disable-gpu");
         WebDriver driver = new ChromeDriver(options);
         Actions actions = new Actions(driver);
         
@@ -169,8 +169,8 @@ public class JobScrapping2 {
             }
         }
         
-      //  driver.quit(); // Make sure to quit the WebDriver
-       // connection.close();
+        driver.quit(); // Make sure to quit the WebDriver
+        connection.close();
     }
 
     private static WebElement getElementIfExists(WebDriver driver, String xpath) {

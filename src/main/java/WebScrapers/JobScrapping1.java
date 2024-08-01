@@ -26,9 +26,9 @@ public class JobScrapping1 {
 			throws IOException, InterruptedException, SQLException, ClassNotFoundException {
 
 		ChromeOptions options = new ChromeOptions();
-//		options.addArguments("--headless");
-//		options.addArguments("--window-size=1920x1080");
-//		options.addArguments("--disable-gpu");
+		options.addArguments("--headless");
+		options.addArguments("--window-size=1920x1080");
+		options.addArguments("--disable-gpu");
 		WebDriver driver = new ChromeDriver(options);
 		Actions actions = new Actions(driver);
 
@@ -74,7 +74,8 @@ public class JobScrapping1 {
 	     List<String> tabs = new ArrayList<>(driver.getWindowHandles());
 	     driver.switchTo().window(tabs.get(1));
 	     
-
+ // **-----Uncomment this backup code if filters are not working trough URL------**//
+	     
 //		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@id='role']//div[text()='Any']")))
 //				.click();
 //
@@ -205,8 +206,8 @@ public class JobScrapping1 {
 			System.out.println("Code Not executed completely");
 			e.printStackTrace();
 		} finally {
-		//	driver.quit();
-		//	connection.close();
+		driver.quit();
+		connection.close();
 		}
 
 	}
