@@ -136,6 +136,12 @@ public class JobScrapping1 {
 				for (int j = 1; j <= jobTitles.size(); j++) {
 					String companyName = driver.findElement(By.xpath("//span[@class='company-name hover:underline']"))
 							.getText();
+					
+					if( companyName =="companyName") {
+						
+						System.out.println("block");
+						
+					}
 					String JobTitle = driver.findElement(By
 							.xpath("(//div[contains(@class,'justify-between sm:flex-row')]//div[@class='job-name']//a)["
 									+ j + "]"))
@@ -156,12 +162,20 @@ public class JobScrapping1 {
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 					dateCreated = now.format(formatter);
 
-					WebElement employeesElement = driver
+					WebElement employeesElement1 = driver
 							.findElement(By.xpath("//i[contains(@title,'people')]/following-sibling::div"));
-					if (employeesElement != null) {
-						String employeeNumTExt = employeesElement.getText();
+					WebElement employeesElement2 = driver
+							.findElement(By.xpath("//i[contains(@title,'person')]/following-sibling::div"));
+					if (employeesElement1 != null) {
+						String employeeNumTExt = employeesElement1.getText();
 						String[] splits = employeeNumTExt.split(" ");
 						employeeCount = splits[0].trim();
+					}else if(employeesElement2 != null) {
+						String employeeNumTExt = employeesElement2.getText();
+						String[] splits = employeeNumTExt.split(" ");
+						employeeCount = splits[0].trim();
+					}else {
+						employeeCount= null;
 					}
 
 					// Check if job URL already exists
