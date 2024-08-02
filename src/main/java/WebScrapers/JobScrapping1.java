@@ -12,6 +12,7 @@ import org.openqa.selenium.interactions.Actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.io.IOException;
 import java.sql.Connection;
@@ -28,9 +29,9 @@ public class JobScrapping1 {
 			throws IOException, InterruptedException, SQLException, ClassNotFoundException {
 
 		ChromeOptions options = new ChromeOptions();
-//		options.addArguments("--headless");
-//		options.addArguments("--window-size=1920x1080");
-//		options.addArguments("--disable-gpu");
+		options.addArguments("--headless");
+		options.addArguments("--window-size=1920x1080");
+		options.addArguments("--disable-gpu");
 		WebDriver driver = new ChromeDriver(options);
 		Actions actions = new Actions(driver);
 
@@ -39,6 +40,7 @@ public class JobScrapping1 {
 		driver.get("https://account.ycombinator.com/?continue=https%3A%2F%2Fwww.workatastartup.com%2F");
 		driver.manage().window().maximize();
 		sleepRandom();
+		System.out.println("ADDING JOBS FROM \"www.workatastartup.com\"");
 
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
@@ -112,8 +114,11 @@ public class JobScrapping1 {
 		String companyWebsite = null;
 		String source = "workatastartup.com";
 		String dateCreated = null;
-
+		String msg="";
+		WebElement employeesElement1 = null;
+		WebElement employeesElement2=null;
 		try {
+		
 			System.out.println("Adding JObs to DB please wait untill it shows completed.....");
 			for (int i = 1; i <= totalmatchings; i++) {
 
@@ -162,10 +167,12 @@ public class JobScrapping1 {
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 					dateCreated = now.format(formatter);
 
-					WebElement employeesElement1 = driver
-							.findElement(By.xpath("//i[contains(@title,'people')]/following-sibling::div"));
-					WebElement employeesElement2 = driver
-							.findElement(By.xpath("//i[contains(@title,'person')]/following-sibling::div"));
+					try {
+					 employeesElement1 = getElementIfExists(driver, "//i[contains(@title,'people')]/following-sibling::div");
+					 
+					 employeesElement2 = getElementIfExists(driver, "//i[contains(@title,'person')]/following-sibling::div");
+					
+					}finally{
 					if (employeesElement1 != null) {
 						String employeeNumTExt = employeesElement1.getText();
 						String[] splits = employeeNumTExt.split(" ");
@@ -176,13 +183,17 @@ public class JobScrapping1 {
 						employeeCount = splits[0].trim();
 					}else {
 						employeeCount= null;
+						
 					}
+				}
+					
 
 					// Check if job URL already exists
 					PreparedStatement checkStatement = connection.prepareStatement(checkSQL);
 					checkStatement.setString(1, JobURL);
 					ResultSet resultSet = checkStatement.executeQuery();
 					if (resultSet.next() && resultSet.getInt(1) == 0) {
+						
 						// Insert new job listing
 						PreparedStatement insertStatement = connection.prepareStatement(insertSQL);
 						insertStatement.setString(1, JobTitle);
@@ -195,9 +206,11 @@ public class JobScrapping1 {
 						insertStatement.setString(8, dateCreated);
 						insertStatement.executeUpdate();
 						insertStatement.close();
-
+						
 						totalJobsAppended++;
-
+						
+						System.out.println(msg);
+						
 					}
 					resultSet.close();
 					checkStatement.close();
@@ -226,6 +239,18 @@ public class JobScrapping1 {
 		}
 
 	}
+	
+	   private static WebElement getElementIfExists(WebDriver driver, String xpath) {
+	        try {
+	            List<WebElement> elements = driver.findElements(By.xpath(xpath));
+	            if (elements.size() > 0) {
+	                return elements.get(0);
+	            }
+	        } catch (NoSuchElementException e) {
+	            // Element is not found, return null
+	        }
+	        return null;
+	    }
 
 	private static void sleepRandom() {
 		try {

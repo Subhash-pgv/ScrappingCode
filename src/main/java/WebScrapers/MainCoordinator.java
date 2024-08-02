@@ -9,6 +9,7 @@ public class MainCoordinator {
         WebScrapers.JobScrapping1.main(args);
         WebScrapers.JobScrapping2.main(args);
         WebScrapers.JobScrapping3.main(args);
+        WebScrapers.JobScrapping4.main(args);
 
     }
 }

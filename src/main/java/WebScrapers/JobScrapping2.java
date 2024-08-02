@@ -42,6 +42,7 @@ public class JobScrapping2 {
         driver.get("https://weworkremotely.com/remote-jobs/search?search_uuid=&term=&sort=any_time&categories%5B%5D=2&categories%5B%5D=17&categories%5B%5D=18&region%5B%5D=1&region%5B%5D=5&region%5B%5D=6&region%5B%5D=7&company_size%5B%5D=1+-+10&company_size%5B%5D=11+-+50");
         driver.manage().window().maximize();
         sleepRandom();
+        System.out.println("ADDING JOBS FROM \"weworkremotely.com\"");
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 

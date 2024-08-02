@@ -1,5 +1,6 @@
 package WebScrapers;
 
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -14,6 +15,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.NumberFormat;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -21,10 +23,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
-public class JobScrapping3 {
+public class JobScrapping4 {
     public static void main(String[] args) {
         WebDriver driver = null;
         Connection connection = null;
@@ -36,10 +39,10 @@ public class JobScrapping3 {
             driver = new ChromeDriver(options);
             Actions actions = new Actions(driver);
             JavascriptExecutor js = (JavascriptExecutor) driver;
-            driver.get("https://jobgether.com/search-offers?industries=62448b478cb2bb9b3540b78f&industries=62448b478cb2bb9b3540b791&locations=622a65bd671f2c8b98faca1a");
+            driver.get("https://www.workingnomads.com/jobs?location=europe,australia,usa,uk&category=development");
             driver.manage().window().maximize();
             
-            System.out.println("ADDING JOBS FROM \"jobgether.com\"");
+            System.out.println("ADDING JOBS FROM \"workingnomads.com\"");
 
             Thread.sleep(5000);
 
@@ -54,10 +57,18 @@ public class JobScrapping3 {
             String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocation, jobUrl, companyName, employeeCount, companyWebsite, source, dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             String checkSQL = "SELECT COUNT(*) FROM JobListings WHERE jobUrl = ?";
 
-            WebElement resultCountElement = driver.findElement(By.xpath("//div[contains(@class,'sort_counter_container')]/div/div[1]"));
+            WebElement resultCountElement = driver.findElement(By.xpath("(//div[contains(@class,'total-number')])[1]"));
             String resultText = resultCountElement.getText();
-            String[] parts = resultText.split(" ");
-            int totalJobCount = Integer.parseInt(parts[0].trim());
+            String parts =  resultText.split(" ")[0];
+            NumberFormat format = NumberFormat.getInstance(Locale.US);
+            int totalJobCount=0;
+            try {
+                Number number = format.parse(parts);
+                totalJobCount = number.intValue();
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             int totalJobsAppended = 0;
 
@@ -67,7 +78,7 @@ public class JobScrapping3 {
                 String jobLocation = "";
                 String jobURL = "";
                 String companyWebsite = "";
-                String source = "jobgether.com";
+                String source = "workingnomads.com";
                 String companySize = "";
                 String dateCreated = "";
                 
@@ -76,11 +87,12 @@ public class JobScrapping3 {
                 
                 
                 WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("(//div[@id='offer-body'])[" + i + "]/div/div/h3")));
-                WebElement jobTitleElement = getElementIfExists(driver, "(//div[@id='offer-body'])[" + i + "]/div/div/h3");
+                wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("(//div[@class='job-cols']//h4/a)["+ i +"]")));
+                WebElement jobTitleElement = getElementIfExists(driver, "(//div[@class='job-cols']//h4[1]//a)["+ i +"]");
+                //Make webelement on focus 
                 if(i%2==0) {
                 	int j=i-1;
-                	((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", driver.findElement(By.xpath("(//div[@id='offer-body'])[" + j + "]/div/div/h3")));
+                	((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", driver.findElement(By.xpath("(//div[@class='job-cols']//h4/a)["+ j +"]")));
                 }
                 
                 if (jobTitleElement != null) {
@@ -90,54 +102,57 @@ public class JobScrapping3 {
                 
                
             	wait.until(ExpectedConditions.presenceOfElementLocated(
-						By.xpath("(//div[@id='offer-body']/parent::div/preceding-sibling::a)[" + i + "]")));
-                WebElement jobLinkElement = getElementIfExists(driver, "(//div[@id='offer-body']/parent::div/preceding-sibling::a)[" + i + "]");
+						By.xpath("(//div[@class='job-cols']//h4/a)["+ i +"]")));
+                WebElement jobLinkElement = getElementIfExists(driver, "(//div[@class='job-cols']//h4[1]/a)["+ i +"]");
                
                 if (jobLinkElement != null) {
-                    jobLinkElement.click();
+                	jobURL =  jobLinkElement.getAttribute("href");
                     sleepRandom();
 
-                   
-                    List<String> tabs = new ArrayList<>(driver.getWindowHandles());
-                    driver.switchTo().window(tabs.get(1));
-                    jobURL = driver.getCurrentUrl();
-
+                    
                     // Extract additional details
-                    WebElement jobLocationElement = getElementIfExists(driver, "//div[@id='offer_general_data']//span[contains(.,'Work from:')]/following-sibling::div");
+                    WebElement jobLocationElement = getElementIfExists(driver, "(//div[contains(@class,'boxes')]//div[contains(@ng-show,'source.locations')])[" + i +"]");
                     if (jobLocationElement != null) {
                         jobLocation = jobLocationElement.getText();
                     }
 
-                    WebElement companyNameElement = getElementIfExists(driver, "//div[contains(@class,'flex justify-center')]/following-sibling::span[1]");
+                    String URL = null;
+                    WebElement companyNameElement = getElementIfExists(driver, "(//div[@class='job-cols'])["+i+"]//div[contains(@class,'company')]/a");
                     if (companyNameElement != null) {
                         companyName = companyNameElement.getText();
+                        URL = companyNameElement.getAttribute("href");
+                       
+                    }
+                    
+                    
+                    String script = "window.open(arguments[0], '_blank');";
+    		        js.executeScript(script, URL);
+                    
+                    List<String> tabs = new ArrayList<>(driver.getWindowHandles());
+                    driver.switchTo().window(tabs.get(1));
+                    sleepRandom();
+                    
+
+                    WebElement companyUrlElement1 = getElementIfExists(driver,"//div[@class='company-links']/a");
+                    if (companyUrlElement1 != null) {
+                        companyWebsite = companyUrlElement1.getAttribute("href");
                     }
 
-                    WebElement companyUrlElement = getElementIfExists(driver, "//div[contains(@class,'flex justify-center')]/following-sibling::a");
-                    if (companyUrlElement != null) {
-                        companyWebsite = companyUrlElement.getAttribute("href");
+                    WebElement companyUrlElement2 = getElementIfExists(driver,"//div[@class='job-company']//a");
+                    if (companyUrlElement2 != null) {
+                        companyWebsite = companyUrlElement2.getAttribute("href");
                     }
-
-                    WebElement companySizeElement = getElementIfExists(driver, "//div[contains(@class,'flex justify-center')]/following-sibling::div//span");
-                    if (companySizeElement != null) {
-                        companySize = companySizeElement.getText();
-                    }
-
                     LocalDateTime now = LocalDateTime.now();
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                     dateCreated = now.format(formatter);
 
-                    List<String> validSizes = Arrays.asList("11 - 50", "2 - 10","51 - 200");
-                    
-                  if(i==35) {
-                	  int l=0;
-                  }
                     // Check if job URL already exists
                     PreparedStatement checkStatement = connection.prepareStatement(checkSQL);
                     checkStatement.setString(1, jobURL);
                     ResultSet resultSet = checkStatement.executeQuery();
+                   
                     if (resultSet.next() && resultSet.getInt(1) == 0) { 	
-                    	if (validSizes.contains(companySize)) {
+                    	
                         // Insert new job listing
                         PreparedStatement insertStatement = connection.prepareStatement(insertSQL);
                         insertStatement.setString(1, jobTitle);
@@ -152,7 +167,7 @@ public class JobScrapping3 {
                         insertStatement.close();
                         totalJobsAppended++;
                     	 }
-                    }
+                    
                     
                     resultSet.close();
                     checkStatement.close();
@@ -160,9 +175,9 @@ public class JobScrapping3 {
                     driver.close();
                     driver.switchTo().window(tabs.get(0));
 
-                    if (i % 35 == 0) {
-                        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", driver.findElement(By.xpath("(//div[@id='offer-body']/parent::div/preceding-sibling::a)[" + i + "]")));
-                        driver.findElement(By.xpath("//a[normalize-space()='See more']")).click();
+                    if (i % 50 == 0) {
+                       
+                        driver.findElement(By.xpath("//div[@class='show-more']")).click();
                     }
                 }
             }
