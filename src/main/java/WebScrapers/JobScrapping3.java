@@ -79,7 +79,7 @@ public class JobScrapping3 {
 
                     System.out.println("Adding Jobs to DB please wait until it shows completed.....");
 
-                    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+                    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
                     wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("(//div[@id='offer-body'])[" + i + "]/div/div/h3")));
                     
                  
@@ -211,6 +211,7 @@ public class JobScrapping3 {
             WebElement closeButton = getElementIfExists(driver, "//button[@data-pc-section='closebutton']"); // Replace with actual class or ID
             if (closeButton != null) {
                 closeButton.click();
+                System.out.println("pop-up closed");
             }
         } catch (Exception e) {
            
