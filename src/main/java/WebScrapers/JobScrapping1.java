@@ -75,31 +75,6 @@ public class JobScrapping1 {
 		List<String> tabs = new ArrayList<>(driver.getWindowHandles());
 		driver.switchTo().window(tabs.get(1));
 
-		// **-----Uncomment this backup code if filters are not working trough
-		// URL------**//
-
-//		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@id='role']//div[text()='Any']")))
-//				.click();
-//
-//		driver.findElement(By.xpath("//div[@id='react-select-2-option-1']")).click();
-//
-//		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@id='companySize']//div[text()='Any']")))
-//				.click();
-//
-//		driver.findElement(By.xpath("//div[@id='react-select-4-option-1']")).click();
-//
-//		wait.until(ExpectedConditions
-//				.presenceOfElementLocated(By.xpath("//div[@id='companySize']//div[contains(text(),'1 - 10 people')]")))
-//				.click();
-//
-//		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@id='react-select-4-option-2']")))
-//				.click();
-//
-//		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[contains(text(),'Select...')]")))
-//				.click();
-//
-//		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[.='Remote only']"))).click();
-
 		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//p[contains(normalize-space(.), 'matching startups')]")));
 		Thread.sleep(5000);
 		WebElement resultCountElement = driver
@@ -119,9 +94,8 @@ public class JobScrapping1 {
 		WebElement employeesElement1 = null;
 		WebElement employeesElement2=null;
 		try {
-		
-			System.out.println("Adding JObs to DB please wait untill it shows completed.....");
 			for (int i = 1; i <= totalmatchings; i++) {
+				System.out.println("Adding JObs to DB please wait untill it shows completed.....");
 
 				String xpathExpression = String.format(
 						"(//div[contains(@class,'mb-5 rounded pb-4')])[%d]//div[contains(@class,'font-medium')]", i);
@@ -187,7 +161,6 @@ public class JobScrapping1 {
 						
 					}
 				}
-					
 
 					// Check if job URL already exists
 					PreparedStatement checkStatement = connection.prepareStatement(checkSQL);
@@ -198,7 +171,7 @@ public class JobScrapping1 {
 						// Insert new job listing
 						PreparedStatement insertStatement = connection.prepareStatement(insertSQL);
 						insertStatement.setString(1, JobTitle);
-						insertStatement.setString(2, JobLocation);
+						insertStatement.setString(2, JobLocations);
 						insertStatement.setString(3, JobURL);
 						insertStatement.setString(4, companyName);
 						insertStatement.setString(5, employeeCount);
