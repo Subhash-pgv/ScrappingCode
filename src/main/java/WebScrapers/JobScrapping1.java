@@ -40,7 +40,7 @@ public class JobScrapping1 {
 		driver.get("https://account.ycombinator.com/?continue=https%3A%2F%2Fwww.workatastartup.com%2F");
 		driver.manage().window().maximize();
 		sleepRandom();
-		System.out.println("ADDING JOBS FROM \"www.workatastartup.com\"");
+		System.out.println("ADDING JOBS FROM \"www.ycombinator.com\"");
 
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
@@ -88,11 +88,12 @@ public class JobScrapping1 {
 		int totalJobsAppended = 0;
 		String employeeCount = null;
 		String companyWebsite = null;
-		String source = "workatastartup.com";
+		String source = "ycombinator.com";
 		String dateCreated = null;
 		String msg="";
 		WebElement employeesElement1 = null;
 		WebElement employeesElement2=null;
+				
 		try {
 			for (int i = 1; i <= totalmatchings; i++) {
 				System.out.println("Adding JObs to DB please wait untill it shows completed.....");
@@ -162,13 +163,13 @@ public class JobScrapping1 {
 					}
 				}
 
-					// Check if job URL already exists
+					// Checks if job URL already exists
 					PreparedStatement checkStatement = connection.prepareStatement(checkSQL);
 					checkStatement.setString(1, JobURL);
 					ResultSet resultSet = checkStatement.executeQuery();
 					if (resultSet.next() && resultSet.getInt(1) == 0) {
 						
-						// Insert new job listing
+						// Inserts new job listing
 						PreparedStatement insertStatement = connection.prepareStatement(insertSQL);
 						insertStatement.setString(1, JobTitle);
 						insertStatement.setString(2, JobLocations);
