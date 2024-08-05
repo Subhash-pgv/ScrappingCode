@@ -172,7 +172,7 @@ public class JobScrapping1 {
 						// Inserts new job listing
 						PreparedStatement insertStatement = connection.prepareStatement(insertSQL);
 						insertStatement.setString(1, JobTitle);
-						insertStatement.setString(2, JobLocations);
+						insertStatement.setString(2, JobLocation);
 						insertStatement.setString(3, JobURL);
 						insertStatement.setString(4, companyName);
 						insertStatement.setString(5, employeeCount);
