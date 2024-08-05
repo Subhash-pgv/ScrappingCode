@@ -40,7 +40,7 @@ public class JobScrapping1 {
 		driver.get("https://account.ycombinator.com/?continue=https%3A%2F%2Fwww.workatastartup.com%2F");
 		driver.manage().window().maximize();
 		sleepRandom();
-		System.out.println("ADDING JOBS FROM \"www.workatastartup.com\"");
+		System.out.println("ADDING JOBS FROM \"www.ycombinator.com\"");
 
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
@@ -51,7 +51,7 @@ public class JobScrapping1 {
 
 		Connection connection = DriverManager.getConnection(connectionURL);
 
-		String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocation, jobUrl, companyName,employeeCount,companyWebsite,source,dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+		String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocations, jobUrl, companyName,employeeCount,companyWebsite,source,dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 		String checkSQL = "SELECT COUNT(*) FROM jobListings WHERE jobUrl = ?";
 
 		wait.until(ExpectedConditions
@@ -66,61 +66,36 @@ public class JobScrapping1 {
 		driver.findElement(By.xpath("//span[@class='MuiButton-label']")).click();
 		sleepRandom();
 
-		// Open a new tab with searchparameters link
-		String URL = "https://www.workatastartup.com/companies?companySize=seed&companySize=small&demographic=any&hasEquity=any&hasSalary=any&industry=any&interviewProcess=any&jobType=any&layout=list-compact&locations=US&locations=GB&locations=AU&locations=AT&locations=BE&locations=BG&locations=HR&locations=CY&locations=CZ&locations=DK&locations=FI&locations=FR&locations=DE&locations=GR&locations=HU&locations=IT&locations=MT&locations=NL&role=eng&sortBy=created_desc&tab=any&usVisaNotRequired=any";
-		String script = "window.open(arguments[0], '_blank');";
-		js.executeScript(script, URL);
-		sleepRandom();
-
-		List<String> tabs = new ArrayList<>(driver.getWindowHandles());
-		driver.switchTo().window(tabs.get(1));
-
-		// **-----Uncomment this backup code if filters are not working trough
-		// URL------**//
-
-//		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@id='role']//div[text()='Any']")))
-//				.click();
-//
-//		driver.findElement(By.xpath("//div[@id='react-select-2-option-1']")).click();
-//
-//		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@id='companySize']//div[text()='Any']")))
-//				.click();
-//
-//		driver.findElement(By.xpath("//div[@id='react-select-4-option-1']")).click();
-//
-//		wait.until(ExpectedConditions
-//				.presenceOfElementLocated(By.xpath("//div[@id='companySize']//div[contains(text(),'1 - 10 people')]")))
-//				.click();
-//
-//		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[@id='react-select-4-option-2']")))
-//				.click();
-//
-//		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[contains(text(),'Select...')]")))
-//				.click();
-//
-//		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[.='Remote only']"))).click();
-
-		Thread.sleep(5000);
-		WebElement resultCountElement = driver
-				.findElement(By.xpath("//p[contains(normalize-space(.), 'matching startups')]"));
-		String resultText = resultCountElement.getText();
-		sleepRandom();
-		String[] parts = resultText.split(" ");
-		String numberStr = parts[1].trim();
-		// Total number of comapnies
-		int totalmatchings = Integer.parseInt(numberStr);
+		openUrl( driver);
+		WebElement resultCountElement = driver.findElement(By.xpath("//p[contains(normalize-space(.), 'matching startups')]"));;
+		int totalmatching =0;
+		if(resultCountElement !=null) {
+			String resultText = resultCountElement.getText();
+			sleepRandom();
+			String[] parts = resultText.split(" ");
+			String numberStr = parts[1].trim();
+			// Total number of comapnies
+			totalmatching = Integer.parseInt(numberStr);
+		}else {
+			driver.close();
+		
+			openUrl( driver);	
+			}
+	
 		int totalJobsAppended = 0;
 		String employeeCount = null;
 		String companyWebsite = null;
-		String source = "workatastartup.com";
+		String source = "ycombinator.com";
 		String dateCreated = null;
 		String msg="";
+		WebElement matching = null;
 		WebElement employeesElement1 = null;
 		WebElement employeesElement2=null;
 		try {
 		
-			System.out.println("Adding JObs to DB please wait untill it shows completed.....");
-			for (int i = 1; i <= totalmatchings; i++) {
+			
+			for (int i = 1; i <= totalmatching; i++) {
+				System.out.println("Adding JObs to DB please wait untill it shows completed.....");
 
 				String xpathExpression = String.format(
 						"(//div[contains(@class,'mb-5 rounded pb-4')])[%d]//div[contains(@class,'font-medium')]", i);
@@ -208,7 +183,7 @@ public class JobScrapping1 {
 						insertStatement.close();
 						
 						totalJobsAppended++;
-						
+
 						System.out.println(msg);
 						
 					}
@@ -218,7 +193,7 @@ public class JobScrapping1 {
 				driver.close();
 				driver.switchTo().window(tab.get(1));
 
-				if (i == totalmatchings) {
+				if (i == totalmatching) {
 					System.out.println("Searched all companies for new jobs");
 
 					if (i == totalJobsAppended) {
@@ -247,7 +222,7 @@ public class JobScrapping1 {
 	                return elements.get(0);
 	            }
 	        } catch (NoSuchElementException e) {
-	            // Element is not found, return null
+	                e.getStackTrace();
 	        }
 	        return null;
 	    }
@@ -259,5 +234,23 @@ public class JobScrapping1 {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static void openUrl(WebDriver driver) throws InterruptedException {
+		
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+	
+        String URL = "https://www.workatastartup.com/companies?companySize=seed&companySize=small&demographic=any&hasEquity=any&hasSalary=any&industry=any&interviewProcess=any&jobType=any&layout=list-compact&locations=US&locations=GB&locations=AU&locations=AT&locations=BE&locations=BG&locations=HR&locations=CY&locations=CZ&locations=DK&locations=FI&locations=FR&locations=DE&locations=GR&locations=HU&locations=IT&locations=MT&locations=NL&role=eng&sortBy=created_desc&tab=any&usVisaNotRequired=any";
+		String script = "window.open(arguments[0], '_blank');";
+		sleepRandom();
+		js.executeScript(script, URL);
+		Thread.sleep(5000);
+
+		List<String> tabs = new ArrayList<>(driver.getWindowHandles());
+		driver.switchTo().window(tabs.get(1));
+
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//p[contains(normalize-space(.), 'matching startups')]")));
+		sleepRandom();
 	}
 }
