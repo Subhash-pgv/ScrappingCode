@@ -100,6 +100,7 @@ public class JobScrapping1 {
 //
 //		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//div[.='Remote only']"))).click();
 
+		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//p[contains(normalize-space(.), 'matching startups')]")));
 		Thread.sleep(5000);
 		WebElement resultCountElement = driver
 				.findElement(By.xpath("//p[contains(normalize-space(.), 'matching startups')]"));
