@@ -51,7 +51,7 @@ public class JobScrapping1 {
 
 		Connection connection = DriverManager.getConnection(connectionURL);
 
-		String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocation, jobUrl, companyName,employeeCount,companyWebsite,source,dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+		String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocations, jobUrl, companyName,employeeCount,companyWebsite,source,dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 		String checkSQL = "SELECT COUNT(*) FROM jobListings WHERE jobUrl = ?";
 
 		wait.until(ExpectedConditions
