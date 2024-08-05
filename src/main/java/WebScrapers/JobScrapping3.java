@@ -30,13 +30,24 @@ public class JobScrapping3 {
         Connection connection = null;
         try {
             ChromeOptions options = new ChromeOptions();
-             options.addArguments("--headless");
-             options.addArguments("--window-size=1920x1080");
-             options.addArguments("--disable-gpu");
+//             options.addArguments("--headless");
+//             options.addArguments("--window-size=1920x1080");
+//             options.addArguments("--disable-gpu");
             driver = new ChromeDriver(options);
             Actions actions = new Actions(driver);
             JavascriptExecutor js = (JavascriptExecutor) driver;
-            driver.get("https://jobgether.com/search-offers?industries=62448b478cb2bb9b3540b78f&industries=62448b478cb2bb9b3540b791&locations=622a65bd671f2c8b98faca1a");
+            
+            String UK ="622a65b4671f2c8b98fac83f";
+            String USA ="622a65bd671f2c8b98faca1a";
+            String EUROPE = "622a659af0bac38678ed1398";
+            String Australia ="622a65b0671f2c8b98fac759";
+            
+            int totalJobsAppended = 0;
+            
+            String[] locations = {UK,USA,EUROPE,Australia};
+            for (String location :locations)
+            {
+            driver.get("https://jobgether.com/search-offers?locations="+location+"&industries=62448b478cb2bb9b3540b791&industries=62448b478cb2bb9b3540b78f");
             driver.manage().window().maximize();
             
             System.out.println("ADDING JOBS FROM \"jobgether.com\"");
@@ -51,7 +62,7 @@ public class JobScrapping3 {
             connection = DriverManager.getConnection(connectionURL);
 
             // SQL queries
-            String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocation, jobUrl, companyName, employeeCount, companyWebsite, source, dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocations, jobUrl, companyName, employeeCount, companyWebsite, source, dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             String checkSQL = "SELECT COUNT(*) FROM JobListings WHERE jobUrl = ?";
 
             WebElement resultCountElement = driver.findElement(By.xpath("//div[contains(@class,'sort_counter_container')]/div/div[1]"));
@@ -59,7 +70,7 @@ public class JobScrapping3 {
             String[] parts = resultText.split(" ");
             int totalJobCount = Integer.parseInt(parts[0].trim());
 
-            int totalJobsAppended = 0;
+            
 
             for (int i = 1; i <= totalJobCount; i++) {
                 String companyName = "";
@@ -165,10 +176,9 @@ public class JobScrapping3 {
                         driver.findElement(By.xpath("//a[normalize-space()='See more']")).click();
                     }
                 }
-            }
-
-            System.out.println("Total jobs appended: " + totalJobsAppended);
-
+            }  
+          }   
+        System.out.println("Total jobs appended: " + totalJobsAppended);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -183,6 +193,7 @@ public class JobScrapping3 {
                 }
             }
         }
+      
     }
 
     private static WebElement getElementIfExists(WebDriver driver, String xpath) {

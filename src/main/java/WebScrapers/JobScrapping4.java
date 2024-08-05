@@ -54,7 +54,7 @@ public class JobScrapping4 {
             connection = DriverManager.getConnection(connectionURL);
 
             // SQL queries
-            String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocation, jobUrl, companyName, employeeCount, companyWebsite, source, dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocations, jobUrl, companyName, employeeCount, companyWebsite, source, dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             String checkSQL = "SELECT COUNT(*) FROM JobListings WHERE jobUrl = ?";
 
             WebElement resultCountElement = driver.findElement(By.xpath("(//div[contains(@class,'total-number')])[1]"));
