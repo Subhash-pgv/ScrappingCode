@@ -40,7 +40,7 @@ public class JobScrapping3 {
 
             int totalJobsAppended = 0;
 
-            String[] locations = {UK, USA, EUROPE, Australia};
+            String[] locations = {EUROPE, Australia,UK, USA};
             for (String location : locations) {
                 driver.get("https://jobgether.com/search-offers?locations=" + location + "&industries=62448b478cb2bb9b3540b791&industries=62448b478cb2bb9b3540b78f");
                 driver.manage().window().maximize();
