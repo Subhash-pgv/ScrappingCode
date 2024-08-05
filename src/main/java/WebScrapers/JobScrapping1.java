@@ -66,7 +66,6 @@ public class JobScrapping1 {
 		driver.findElement(By.xpath("//span[@class='MuiButton-label']")).click();
 		sleepRandom();
 
-<<<<<<< HEAD
 		openUrl( driver);
 		WebElement resultCountElement = driver.findElement(By.xpath("//p[contains(normalize-space(.), 'matching startups')]"));;
 		int totalmatching =0;
@@ -82,46 +81,28 @@ public class JobScrapping1 {
 		
 			openUrl( driver);	
 			}
-	
-=======
-		// Open a new tab with searchparameters link
-		String URL = "https://www.workatastartup.com/companies?companySize=seed&companySize=small&demographic=any&hasEquity=any&hasSalary=any&industry=any&interviewProcess=any&jobType=any&layout=list-compact&locations=US&locations=GB&locations=AU&locations=AT&locations=BE&locations=BG&locations=HR&locations=CY&locations=CZ&locations=DK&locations=FI&locations=FR&locations=DE&locations=GR&locations=HU&locations=IT&locations=MT&locations=NL&role=eng&sortBy=created_desc&tab=any&usVisaNotRequired=any";
-		String script = "window.open(arguments[0], '_blank');";
-		js.executeScript(script, URL);
-		sleepRandom();
 
-		List<String> tabs = new ArrayList<>(driver.getWindowHandles());
-		driver.switchTo().window(tabs.get(1));
-
-		wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//p[contains(normalize-space(.), 'matching startups')]")));
-		Thread.sleep(5000);
-		WebElement resultCountElement = driver
-				.findElement(By.xpath("//p[contains(normalize-space(.), 'matching startups')]"));
+		resultCountElement = driver.findElement(By.xpath("//p[contains(normalize-space(.), 'matching startups')]"));
 		String resultText = resultCountElement.getText();
 		sleepRandom();
 		String[] parts = resultText.split(" ");
 		String numberStr = parts[1].trim();
 		// Total number of comapnies
 		int totalmatchings = Integer.parseInt(numberStr);
->>>>>>> c3a0dc80b9839e12a1eb0b351ba82caed706fd80
+
 		int totalJobsAppended = 0;
 		String employeeCount = null;
 		String companyWebsite = null;
 		String source = "ycombinator.com";
 		String dateCreated = null;
 		String msg="";
-		WebElement matching = null;
 		WebElement employeesElement1 = null;
 		WebElement employeesElement2=null;
 				
 		try {
-<<<<<<< HEAD
-		
-			
-			for (int i = 1; i <= totalmatching; i++) {
-=======
+
 			for (int i = 1; i <= totalmatchings; i++) {
->>>>>>> c3a0dc80b9839e12a1eb0b351ba82caed706fd80
+
 				System.out.println("Adding JObs to DB please wait untill it shows completed.....");
 
 				String xpathExpression = String.format(
