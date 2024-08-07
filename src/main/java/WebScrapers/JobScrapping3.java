@@ -1,7 +1,10 @@
 package WebScrapers;
 
+import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -9,6 +12,8 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -28,9 +33,9 @@ public class JobScrapping3 {
         Connection connection = null;
         try {
             ChromeOptions options = new ChromeOptions();
-            options.addArguments("--headless");
-            options.addArguments("--window-size=1920x1080");
-            options.addArguments("--disable-gpu");
+//            options.addArguments("--headless");
+//            options.addArguments("--window-size=1920x1080");
+//            options.addArguments("--disable-gpu");
             driver = new ChromeDriver(options);
 
             String UK = "622a65b4671f2c8b98fac83f";
@@ -43,7 +48,12 @@ public class JobScrapping3 {
             String[] locations = {EUROPE, Australia,UK, USA};
             for (String location : locations) {
                 driver.get("https://jobgether.com/search-offers?locations=" + location + "&industries=62448b478cb2bb9b3540b791&industries=62448b478cb2bb9b3540b78f");
-                driver.manage().window().maximize();
+              boolean t = ((ChromeDriver) driver).getCapabilities().getBrowserName().contains("Headless");
+                if(!t) {
+                	driver.manage().window().maximize();
+                }else {
+                MaximizeWindowIfNot.maximizeWindowIfNot(driver);
+               }
                 Thread.sleep(10000);
                 
                 handlePopUp(driver); // Handle pop-ups before interacting with elements
@@ -66,8 +76,11 @@ public class JobScrapping3 {
                 String resultText = resultCountElement.getText();
                 String[] parts = resultText.split(" ");
                 int totalJobCount = Integer.parseInt(parts[0].trim());
-
-                for (int i = 1; i <= totalJobCount; i++) {
+                System.out.println(totalJobCount);
+		
+        
+       
+        for(int i =1; i<=totalJobCount;i++) {
                     String companyName = "";
                     String jobTitle = "";
                     String jobLocation = "";
@@ -80,16 +93,19 @@ public class JobScrapping3 {
                     System.out.println("Adding Jobs to DB please wait until it shows completed.....");
 
                     WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-                    wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("(//div[@id='offer-body'])[" + i + "]/div/div/h3")));
-                    
-                 
                     
                     WebElement jobTitleElement = getElementIfExists(driver, "(//div[@id='offer-body'])[" + i + "]/div/div/h3");
-                    if (i % 2 == 0) {
+                    if(jobTitleElement == null) {
+                    	break;
+                    }
+    
+                    if (i % 2 == 0&&i<=totalJobCount) {
                         int j = i - 1;
                         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", driver.findElement(By.xpath("(//div[@id='offer-body'])[" + j + "]/div/div/h3")));
                     }
 
+					//WebElement jobTitleElement = getElementIfExists(driver, "(//div[@id='offer-body'])[" + i + "]/div/div/h3");
+					
                     if (jobTitleElement != null) {
                         jobTitle = jobTitleElement.getText();
                     }
@@ -100,7 +116,7 @@ public class JobScrapping3 {
                     if (jobLinkElement != null) {
                         jobLinkElement.click();
                         sleepRandom();
-
+                    }
                         List<String> tabs = new ArrayList<>(driver.getWindowHandles());
                         driver.switchTo().window(tabs.get(1));
                         jobURL = driver.getCurrentUrl();
@@ -163,16 +179,19 @@ public class JobScrapping3 {
                         if (i % 35 == 0) {
                             ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", driver.findElement(By.xpath("(//div[@id='offer-body']/parent::div/preceding-sibling::a)[" + i + "]")));
                             driver.findElement(By.xpath("//a[normalize-space()='See more']")).click();
+                            sleepRandom();
                         }
-                    }
+                       
                 }
+   
             }
             System.out.println("Total jobs appended: " + totalJobsAppended);
         } catch (Exception e) {
             e.printStackTrace();
+            takeScreenshot(driver,"error");
         } finally {
             if (driver != null) {
-                driver.quit();
+              //  driver.quit();
             }
             if (connection != null) {
                 try {
@@ -186,14 +205,11 @@ public class JobScrapping3 {
 
     private static WebElement getElementIfExists(WebDriver driver, String xpath) {
         try {
-            List<WebElement> elements = driver.findElements(By.xpath(xpath));
-            if (elements.size() > 0) {
-                return elements.get(0);
-            }
-        } catch (NoSuchElementException e) {
-            // Element is not found, return null
+        	  WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20)); 
+              return wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
+        } catch (Exception e) {
+           return null;
         }
-        return null;
     }
 
     private static void sleepRandom() {
@@ -215,6 +231,19 @@ public class JobScrapping3 {
             }
         } catch (Exception e) {
            
+            e.printStackTrace();
+        }
+    }
+    
+    private static void takeScreenshot(WebDriver driver, String fileName) {
+        try {
+            TakesScreenshot ts = (TakesScreenshot) driver;
+            File source = ts.getScreenshotAs(OutputType.FILE);
+            String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
+            File destination = new File("C:/Users/svegi/eclipse-workspace/WebScrapers/ExtendReports/screenshots/" + fileName + "_" + timestamp + ".png");
+            FileUtils.copyFile(source, destination);
+            System.out.println("Screenshot taken: " + destination.getPath());
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
