@@ -42,12 +42,12 @@ public class JobScrapping3 {
             String[] locations = {EUROPE, Australia,UK, USA};
             for (String location : locations) {
                 driver.get("https://jobgether.com/search-offers?locations=" + location + "&industries=62448b478cb2bb9b3540b791&industries=62448b478cb2bb9b3540b78f");
-              boolean t = ((ChromeDriver) driver).getCapabilities().getBrowserName().contains("Headless");
-                if(!t) {
-                	driver.manage().window().maximize();
-                }else {
-                MaximizeWindowIfNot.maximizeWindowIfNot(driver);
-               }
+//              boolean t = ((ChromeDriver) driver).getCapabilities().getBrowserName().contains("Headless");
+//                if(!t) {
+               	driver.manage().window().maximize();
+//                }else {
+//                MaximizeWindowIfNot.maximizeWindowIfNot(driver);
+//               }
                 Thread.sleep(10000);
                 
                 handlePopUp(driver); // Handle pop-ups before interacting with elements
