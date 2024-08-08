@@ -188,7 +188,7 @@ public class JobScrapping3 {
             System.out.println("Total jobs appended: " + totalJobsAppended);
         } catch (Exception e) {
             e.printStackTrace();
-            takeScreenshot(driver,"error");
+           
         } finally {
             if (driver != null) {
               //  driver.quit();
@@ -235,16 +235,5 @@ public class JobScrapping3 {
         }
     }
     
-    private static void takeScreenshot(WebDriver driver, String fileName) {
-        try {
-            TakesScreenshot ts = (TakesScreenshot) driver;
-            File source = ts.getScreenshotAs(OutputType.FILE);
-            String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
-            File destination = new File("C:/Users/svegi/eclipse-workspace/WebScrapers/ExtendReports/screenshots/" + fileName + "_" + timestamp + ".png");
-            FileUtils.copyFile(source, destination);
-            System.out.println("Screenshot taken: " + destination.getPath());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
 }
