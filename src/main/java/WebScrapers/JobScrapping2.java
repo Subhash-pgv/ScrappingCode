@@ -45,18 +45,11 @@ public class JobScrapping2 {
         System.out.println("ADDING JOBS FROM \"weworkremotely.com\"");
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        
+        
+    	List<String[]> jobDetailsList = new ArrayList<>();
+    	Connection connection = null;
 
-      //sql connection set up
-        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-
-		String connectionURL = "jdbc:sqlserver://10.0.2.34:1433;Database=Automation;User=mailscan;Password=MailScan@343260;encrypt=true;trustServerCertificate=true";
-
-		Connection connection = DriverManager.getConnection(connectionURL);
-		// company web site, source, date time, emp count ,
-	   String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocations, jobUrl, companyName,employeeCount,companyWebsite,source,dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-       String checkSQL = "SELECT COUNT(*) FROM jobListings WHERE jobUrl = ?";
-   
-       
         wait.until(ExpectedConditions
                 .presenceOfElementLocated(By.xpath("//div//ul//li/a//span[@class='title']")));
 
@@ -67,21 +60,26 @@ public class JobScrapping2 {
         int totalJobsAppended = 0;
         int totalJobFinds =0;
         
+    	
+        
+        List<String> tabs = null;
+      
+        try {
         for (int sectionId : sections) {
+        	
+        	String companyName = null;
+            String jobTitle = null;
+            String jobLocation = null;
+            String jobURL = null;
+            String employeeCount=null;
+            String companyWebsite= null;
+            String source= "weworkremotely.com";
+            String dateCreated = null;
+            
         	 System.out.println("Adding JObs to DB please wait untill it shows completed.....");
         	List<WebElement> resultCountElement = driver.findElements(By.xpath("//section[@id='category-" + sectionId + "']//li/a//span[@class='title']"));
    
         	for (int i = 1; i <= resultCountElement.size(); i++) {
-        		
-                String companyName = null;
-                String jobTitle = null;
-                String jobLocation = null;
-                String jobURL = null;
-                String employeeCount=null;
-                String companyWebsite= null;
-                String source= "weworkremotely.com";
-                String dateCreated = null;
-                
 
                 // Handle each element and check if it exists
                 WebElement companyNames = getElementIfExists(driver, "(//section[@id='category-" + sectionId + "']//li[" + i + "]/a//span[@class='company'][1])");
@@ -93,8 +91,6 @@ public class JobScrapping2 {
                 if (jobTitles != null) {
                     jobTitle = jobTitles.getText();
                 }
-
-
 
                 WebElement jobLocations = getElementIfExists(driver, "(//section[@id='category-" + sectionId + "']//li[" + i + "]/a//span[@class='region company'])");
                 if (jobLocations != null) {
@@ -110,7 +106,7 @@ public class JobScrapping2 {
 		        js.executeScript(script, jobURL);
 		        sleepRandom();
 
-				List<String> tabs = new ArrayList<>(driver.getWindowHandles());
+				tabs = new ArrayList<>(driver.getWindowHandles());
 				driver.switchTo().window(tabs.get(1));
 				
 				
@@ -123,56 +119,84 @@ public class JobScrapping2 {
 				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 				dateCreated = now.format(formatter);
                 
-                
-             // Check if job URL already exists
-                PreparedStatement checkStatement = connection.prepareStatement(checkSQL);
-                checkStatement.setString(1, jobURL);
-                ResultSet resultSet = checkStatement.executeQuery();
-                if (resultSet.next() && resultSet.getInt(1) == 0) {
-                    // Insert new job listing
-                    PreparedStatement insertStatement = connection.prepareStatement(insertSQL);
-                    insertStatement.setString(1, jobTitle);
-                    insertStatement.setString(2, jobLocation);
-                    insertStatement.setString(3, jobURL);
-                    insertStatement.setString(4, companyName);
-                    insertStatement.setString(5, employeeCount);
-                    insertStatement.setString(6, companyWebsite);
-                    insertStatement.setString(7, source);
-                    insertStatement.setString(8, dateCreated);
-                    
-                    insertStatement.executeUpdate();
-                    insertStatement.close();
-                    
-                    totalJobsAppended++;
-                    
-                }
-                
-                totalJobFinds++;
-                resultSet.close();
-                checkStatement.close();
-
-                driver.close();
-				driver.switchTo().window(tabs.get(0));
-    
-            }
+				jobDetailsList.add(new String[] {jobTitle, jobLocation, jobURL, companyName, employeeCount,
+						companyWebsite, source, dateCreated});
+				
+				totalJobFinds++;
+        	}	
+	
         }
         
-        if (totalJobCount == totalJobFinds) {
-            System.out.println("Searched all companies for new jobs");
+        }catch(Exception e) {
+        	System.out.println("Code did not execute completely");
+			e.printStackTrace();
+        }finally {
+        	
+        	try {
+				Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+				String connectionURL = "jdbc:sqlserver://10.0.2.34:1433;Database=Automation;User=mailscan;Password=MailScan@343260;encrypt=true;trustServerCertificate=true";
+				connection = DriverManager.getConnection(connectionURL);
 
-            if (totalJobCount == totalJobsAppended) {
-                System.out.println("All (" + totalJobCount + ") companies' jobs added to DB successfully.");
-            } else if (totalJobsAppended > 0) {
-                System.out.println(totalJobsAppended + " jobs added to DB successfully.");
-            } else {
-                System.out.println("No new jobs found");
-               
-            }
+				// SQL queries
+				String checkSQL = "SELECT COUNT(*) FROM JobListings WHERE jobUrl = ?";
+				ResultSet resultSet = null;
+				// Check and insert jobs into the database
+				String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocations, jobUrl, companyName, employeeCount, companyWebsite, source, dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+				
+				for (String[] jobDetails : jobDetailsList) {
+					String jobURL = jobDetails[2];
+
+					// Check if job URL already exists
+					PreparedStatement checkStatement = connection.prepareStatement(checkSQL);
+					checkStatement.setString(1, jobURL);
+					resultSet = checkStatement.executeQuery();
+					if (resultSet.next() && resultSet.getInt(1) == 0) {
+						// Insert new job listing
+						PreparedStatement insertStatement = connection.prepareStatement(insertSQL);
+						for (int j = 0; j < jobDetails.length; j++) {
+							insertStatement.setString(j + 1, jobDetails[j]);
+						}
+						insertStatement.executeUpdate();
+						insertStatement.close();
+						totalJobsAppended++;
+					}
+					resultSet.close();
+					checkStatement.close();
+				}
+
+				
+				 if (totalJobCount == totalJobFinds) {
+			            System.out.println("Searched all companies for new jobs");
+			        }
+				 
+				if (totalJobsAppended > 0) {
+					System.out.println(totalJobsAppended + " jobs added to DB successfully.");
+				} else {
+					System.out.println("No new jobs found.");
+				}
+				if (driver != null) {
+					//driver.quit();
+				}
+				if (connection != null) {
+					try {
+						connection.close();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+
+			} catch (Exception e) {
+				System.out.println("Error in Jobs adding to data base ");
+				e.printStackTrace();
+			}
+        	
         }
-        
+
         driver.quit(); // Make sure to quit the WebDriver
         connection.close();
     }
+    
+    
 
     private static WebElement getElementIfExists(WebDriver driver, String xpath) {
         try {

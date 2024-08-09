@@ -32,9 +32,9 @@ public class JobScrapping3 {
 
 		try {
 			ChromeOptions options = new ChromeOptions();
-//            options.addArguments("--headless");
-//            options.addArguments("--window-size=1920x1080");
-//            options.addArguments("--disable-gpu");
+            options.addArguments("--headless");
+            options.addArguments("--window-size=1920x1080");
+            options.addArguments("--disable-gpu");
 			driver = new ChromeDriver(options);
 
 			String UK = "622a65b4671f2c8b98fac83f";
@@ -207,7 +207,7 @@ public class JobScrapping3 {
 					resultSet.close();
 					checkStatement.close();
 				}
-				if (totalJobsAppended == 0) {
+				if (totalJobsAppended != 0) {
 					System.out.println(totalJobsAppended + " jobs added to DB");
 				} else {
 					System.out.println("No new jobs found");
