@@ -72,7 +72,7 @@ public class JobScrapping4 {
 				String employeeCount = "";
 				String dateCreated = "";
 
-				System.out.println("Adding JObs to DB please wait untill it shows completed.....");
+				System.out.println("Adding Jobs for "+source +" please wait until it shows completed.....");
 
 				WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 				wait.until(ExpectedConditions
@@ -197,7 +197,7 @@ public class JobScrapping4 {
 			}
 
 			if (driver != null) {
-				// driver.quit();
+				driver.quit();
 			}
 			if (connection != null) {
 				try {

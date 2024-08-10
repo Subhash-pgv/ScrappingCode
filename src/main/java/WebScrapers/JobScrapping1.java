@@ -37,6 +37,8 @@ public class JobScrapping1 {
 		WebDriver driver = new ChromeDriver(options);
 		Actions actions = new Actions(driver);
 		JavascriptExecutor js = (JavascriptExecutor) driver;
+		
+		String source = "jobgether.com";
 
 		
 		driver.get("https://account.ycombinator.com/?continue=https%3A%2F%2Fwww.workatastartup.com%2F");
@@ -64,7 +66,7 @@ public class JobScrapping1 {
 
 		try {
 			for (int i = 1; i <= totalmatching; i++) {
-				System.out.println("Adding JObs to DB please wait untill it shows completed.....");
+				System.out.println("Adding Jobs for "+source +" please wait until it shows completed.....");
 
 				
 				String xpathExpression = String.format(
@@ -104,7 +106,7 @@ public class JobScrapping1 {
 					String dateCreated = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 					String employeeCount = getEmployeeCount(driver);
 					
-					String source = "jobgether.com";
+					
 
 					// Store job details in the two-dimensional array
 					jobDetailsList.add(new String[] {jobTitle, jobLocation, jobURL, companyName, employeeCount,
@@ -161,7 +163,7 @@ public class JobScrapping1 {
 					System.out.println("No new jobs found.");
 				}
 				if (driver != null) {
-					//driver.quit();
+					driver.quit();
 				}
 				if (connection != null) {
 					try {

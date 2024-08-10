@@ -32,9 +32,9 @@ public class JobScrapping3 {
 
 		try {
 			ChromeOptions options = new ChromeOptions();
-            options.addArguments("--headless");
-            options.addArguments("--window-size=1920x1080");
-            options.addArguments("--disable-gpu");
+//            options.addArguments("--headless");
+//            options.addArguments("--window-size=1920x1080");
+//            options.addArguments("--disable-gpu");
 			driver = new ChromeDriver(options);
 
 			String UK = "622a65b4671f2c8b98fac83f";
@@ -48,7 +48,7 @@ public class JobScrapping3 {
 				driver.get("https://jobgether.com/search-offers?locations=" + location
 						+ "&industries=62448b478cb2bb9b3540b791&industries=62448b478cb2bb9b3540b78f");
 				driver.manage().window().maximize();
-				Thread.sleep(10000);
+				Thread.sleep(8000);
 
 				handlePopUp(driver);
 
@@ -73,7 +73,7 @@ public class JobScrapping3 {
 						String companySize = "";
 						String dateCreated = "";
 
-						System.out.println("Adding Jobs to DB please wait until it shows completed.....");
+						System.out.println("Adding Jobs for "+source +" please wait until it shows completed.....");
 
 						WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 

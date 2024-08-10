@@ -76,7 +76,7 @@ public class JobScrapping2 {
             String source= "weworkremotely.com";
             String dateCreated = null;
             
-        	 System.out.println("Adding JObs to DB please wait untill it shows completed.....");
+        	 System.out.println("Adding Jobs for "+source +" please wait until it shows completed.....");
         	List<WebElement> resultCountElement = driver.findElements(By.xpath("//section[@id='category-" + sectionId + "']//li/a//span[@class='title']"));
    
         	for (int i = 1; i <= resultCountElement.size(); i++) {
@@ -175,7 +175,7 @@ public class JobScrapping2 {
 					System.out.println("No new jobs found.");
 				}
 				if (driver != null) {
-					//driver.quit();
+					driver.quit();
 				}
 				if (connection != null) {
 					try {
