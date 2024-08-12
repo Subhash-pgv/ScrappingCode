@@ -33,7 +33,7 @@ public class JobScrapping4 {
 
 		List<String[]> jobDetailsList = new ArrayList<>();
 		int totalJobsAppended = 0;
-
+		String source =null;
 		try {
 			ChromeOptions options = new ChromeOptions();
 			options.addArguments("--headless");
@@ -46,6 +46,7 @@ public class JobScrapping4 {
 			driver.manage().window().maximize();
 
 			System.out.println("ADDING JOBS FROM \"workingnomads.com\"");
+			
 
 			Thread.sleep(5000);
 
@@ -68,7 +69,7 @@ public class JobScrapping4 {
 				String jobLocation = "";
 				String jobURL = "";
 				String companyWebsite = "";
-				String source = "workingnomads.com";
+				source = "workingnomads.com";
 				String employeeCount = "";
 				String dateCreated = "";
 
@@ -186,13 +187,13 @@ public class JobScrapping4 {
 				// Summary of results
 
 				if (totalJobsAppended > 0) {
-					System.out.println(totalJobsAppended + " jobs added to DB successfully.");
+					System.out.println(totalJobsAppended + " jobs added to DB successfully.--"+source);
 				} else {
-					System.out.println("No new jobs found.");
+					System.out.println("No new jobs found.--"+source);
 				}
 
 			} catch (Exception e) {
-				System.out.println("Error in Jobs adding to data base ");
+				System.out.println("Error in Jobs adding to data base. -- "+source);
 				e.printStackTrace();
 			}
 

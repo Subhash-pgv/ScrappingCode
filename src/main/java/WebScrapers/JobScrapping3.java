@@ -39,9 +39,9 @@ public class JobScrapping3 {
 
 		try {
 			ChromeOptions options = new ChromeOptions();
-            options.addArguments("--headless");
-            options.addArguments("--window-size=1920x1080");
-            options.addArguments("--disable-gpu");
+//            options.addArguments("--headless");
+//            options.addArguments("--window-size=1920x1080");
+//            options.addArguments("--disable-gpu");
 			driver = new ChromeDriver(options);
 
 			String UK = "622a65b4671f2c8b98fac83f";
@@ -88,14 +88,14 @@ public class JobScrapping3 {
 								"(//div[@id='offer-body'])[" + i + "]/div/div/h3");
 						if (jobTitleElement == null) {
 							
-							try{if (i % 35 == 0) {
-								((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
-										driver.findElement(By.xpath(
-												"(//div[@id='offer-body']/parent::div/preceding-sibling::a)[" + i + "]")));
-								
+							try{
+								if(i==140) {}
+								if (i % 35 == 0) {
 								WebElement seemore = getElementIfExists(driver,"//a[normalize-space()='See more']");
 								if (seemore != null) {
 									seemore.click();
+									jobTitleElement = getElementIfExists(driver,
+											"(//div[@id='offer-body'])[" + i + "]/div/div/h3");
 								}
 								
 								sleepRandom();
@@ -182,28 +182,33 @@ public class JobScrapping3 {
 							}
 							
 							sleepRandom();
+							
+							((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
+									driver.findElement(By.xpath(
+											"(//div[@id='offer-body']/parent::div/preceding-sibling::a)[" + i + "]")));
 						}
 					}
 				} catch (Exception e) {
+					e.printStackTrace();
 					switch(location) {
 					case "622a65b4671f2c8b98fac83f" :
-						System.out.println("Code Not executed completely for UK location");
+						System.out.println("Code Not executed completely for UK location.--"+ source);
 						 break; 
 					case "622a65bd671f2c8b98faca1a" :
-						System.out.println("Code Not executed completely for USA location");
+						System.out.println("Code Not executed completely for USA location.--"+ source);
 						 break;
 					case "622a659af0bac38678ed1398" :
-						System.out.println("Code Not executed completely for EUROPE location");
+						System.out.println("Code Not executed completely for EUROPE location.--"+ source);
 						 break;
 					case "622a65b0671f2c8b98fac759" :
-						System.out.println("Code Not executed completely for AUSTRALIA location");
+						System.out.println("Code Not executed completely for AUSTRALIA location.--"+ source);
 						 break;
 					}
 				} 
 			}
 
 		} catch (Exception e) {
-			System.out.println("Code Not executed completely for "+ source);
+			System.out.println("Code Not executed completely for -- "+ source);
 			
 			e.printStackTrace();
 		} finally {
@@ -238,9 +243,9 @@ public class JobScrapping3 {
 					checkStatement.close();
 				}
 				if (totalJobsAppended != 0) {
-					System.out.println(totalJobsAppended + " jobs added to DB");
+					System.out.println(totalJobsAppended + " jobs added to DB. --"+ source);
 				} else {
-					System.out.println("No new jobs found");
+					System.out.println("No new jobs found.--"+ source);
 				}
 		
 			if (driver != null) {
@@ -277,11 +282,12 @@ public class JobScrapping3 {
 
 	private static void handlePopUp(WebDriver driver) {
 		try {
+			String source = "jobgether.com";
 			// Check if the pop-up exists
 			WebElement closeButton = getElementIfExists(driver, "//button[@data-pc-section='closebutton']");
 			if (closeButton != null) {
 				closeButton.click();
-				System.out.println("pop-up closed");
+				System.out.println("pop-up closed. --"+ source);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

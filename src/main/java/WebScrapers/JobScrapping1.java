@@ -119,7 +119,7 @@ public class JobScrapping1 {
 			}
 
 		} catch (Exception e) {
-			System.out.println("Code did not execute completely");
+			System.out.println("Code did not execute completely.-- "+source);
 			e.printStackTrace();
 		} finally {
 			
@@ -158,9 +158,9 @@ public class JobScrapping1 {
 				// Summary of results
 				
 				if (totalJobsAppended > 0) {
-					System.out.println(totalJobsAppended + " jobs added to DB successfully.");
+					System.out.println(totalJobsAppended + " jobs added to DB successfully. -- "+source);
 				} else {
-					System.out.println("No new jobs found.");
+					System.out.println("No new jobs found.-- "+source);
 				}
 				if (driver != null) {
 					driver.quit();
@@ -174,7 +174,7 @@ public class JobScrapping1 {
 				}
 
 			} catch (Exception e) {
-				System.out.println("Error in Jobs adding to data base ");
+				System.out.println("Error in Jobs adding to data base "+source);
 				e.printStackTrace();
 			}
 		}

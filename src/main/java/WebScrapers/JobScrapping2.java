@@ -37,12 +37,16 @@ public class JobScrapping2 {
         
         JavascriptExecutor js = (JavascriptExecutor) driver;
         
+        
+        
        
 
         driver.get("https://weworkremotely.com/remote-jobs/search?search_uuid=&term=&sort=any_time&categories%5B%5D=2&categories%5B%5D=17&categories%5B%5D=18&region%5B%5D=1&region%5B%5D=5&region%5B%5D=6&region%5B%5D=7&company_size%5B%5D=1+-+10&company_size%5B%5D=11+-+50");
         driver.manage().window().maximize();
         sleepRandom();
         System.out.println("ADDING JOBS FROM \"weworkremotely.com\"");
+        
+        String source=null;
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         
@@ -73,7 +77,7 @@ public class JobScrapping2 {
             String jobURL = null;
             String employeeCount=null;
             String companyWebsite= null;
-            String source= "weworkremotely.com";
+            source= "weworkremotely.com";
             String dateCreated = null;
             
         	 System.out.println("Adding Jobs for "+source +" please wait until it shows completed.....");
@@ -128,7 +132,7 @@ public class JobScrapping2 {
         }
         
         }catch(Exception e) {
-        	System.out.println("Code did not execute completely");
+        	System.out.println("Code did not execute completely.-- "+source);
 			e.printStackTrace();
         }finally {
         	
@@ -166,13 +170,13 @@ public class JobScrapping2 {
 
 				
 				 if (totalJobCount == totalJobFinds) {
-			            System.out.println("Searched all companies for new jobs");
+			            System.out.println("Searched all companies for new jobs.-- "+source);
 			        }
 				 
 				if (totalJobsAppended > 0) {
-					System.out.println(totalJobsAppended + " jobs added to DB successfully.");
+					System.out.println(totalJobsAppended + " jobs added to DB successfully. -"+source);
 				} else {
-					System.out.println("No new jobs found.");
+					System.out.println("No new jobs found.-- "+source);
 				}
 				if (driver != null) {
 					driver.quit();
@@ -186,7 +190,7 @@ public class JobScrapping2 {
 				}
 
 			} catch (Exception e) {
-				System.out.println("Error in Jobs adding to data base ");
+				System.out.println("Error in Jobs adding to data base - "+source);
 				e.printStackTrace();
 			}
         	
