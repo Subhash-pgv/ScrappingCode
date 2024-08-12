@@ -211,14 +211,11 @@ public class JobScrapping4 {
 
 	private static WebElement getElementIfExists(WebDriver driver, String xpath) {
 		try {
-			List<WebElement> elements = driver.findElements(By.xpath(xpath));
-			if (elements.size() > 0) {
-				return elements.get(0);
-			}
-		} catch (NoSuchElementException e) {
-			// Element is not found, return null
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+			return wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
+		} catch (Exception e) {
+			return null;
 		}
-		return null;
 	}
 
 	private static void sleepRandom() {

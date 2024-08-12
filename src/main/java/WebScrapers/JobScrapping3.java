@@ -22,6 +22,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+
+import java.io.File;
+import java.io.IOException;
+
 public class JobScrapping3 {
 	public static void main(String[] args) throws SQLException, ClassNotFoundException {
 		WebDriver driver = null;
@@ -32,9 +39,9 @@ public class JobScrapping3 {
 
 		try {
 			ChromeOptions options = new ChromeOptions();
-            options.addArguments("--headless");
-            options.addArguments("--window-size=1920x1080");
-            options.addArguments("--disable-gpu");
+//            options.addArguments("--headless");
+//            options.addArguments("--window-size=1920x1080");
+//            options.addArguments("--disable-gpu");
 			driver = new ChromeDriver(options);
 
 			String UK = "622a65b4671f2c8b98fac83f";
@@ -80,7 +87,23 @@ public class JobScrapping3 {
 						WebElement jobTitleElement = getElementIfExists(driver,
 								"(//div[@id='offer-body'])[" + i + "]/div/div/h3");
 						if (jobTitleElement == null) {
+							
+							try{if (i % 35 == 0) {
+								((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
+										driver.findElement(By.xpath(
+												"(//div[@id='offer-body']/parent::div/preceding-sibling::a)[" + i + "]")));
+								
+								WebElement seemore = getElementIfExists(driver,"//a[normalize-space()='See more']");
+								if (seemore != null) {
+									seemore.click();
+								}
+								
+								sleepRandom();
+							}
+							}catch(Exception e) {
+							System.out.println("inner break perforemed at "+i);
 							break;
+							}
 						}
 
 						if (i % 2 == 0 && i <= totalJobCount) {
@@ -112,6 +135,7 @@ public class JobScrapping3 {
 								"//div[@id='offer_general_data']//span[contains(.,'Work from:')]/following-sibling::div");
 						if (jobLocationElement != null) {
 							jobLocation = jobLocationElement.getText();
+							
 						}
 
 						WebElement companyNameElement = getElementIfExists(driver,
@@ -147,11 +171,16 @@ public class JobScrapping3 {
 						driver.close();
 						driver.switchTo().window(tabs.get(0));
 
-						if (i % 35 == 0) {
+						if (i % 35 == 0||jobLocationElement == null) {
 							((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
 									driver.findElement(By.xpath(
 											"(//div[@id='offer-body']/parent::div/preceding-sibling::a)[" + i + "]")));
-							driver.findElement(By.xpath("//a[normalize-space()='See more']")).click();
+							
+							WebElement seemore = getElementIfExists(driver,"//a[normalize-space()='See more']");
+							if (seemore != null) {
+								seemore.click();
+							}
+							
 							sleepRandom();
 						}
 					}
@@ -175,6 +204,7 @@ public class JobScrapping3 {
 
 		} catch (Exception e) {
 			System.out.println("Code Not executed completely for "+ source);
+			
 			e.printStackTrace();
 		} finally {
 				// SQL connection setup
@@ -221,6 +251,7 @@ public class JobScrapping3 {
 					connection.close();
 				} catch (Exception e) {
 					e.printStackTrace();
+					 
 				}
 			}
 		}
@@ -256,4 +287,6 @@ public class JobScrapping3 {
 			e.printStackTrace();
 		}
 	}
+	
+	 
 }

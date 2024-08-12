@@ -38,7 +38,7 @@ public class JobScrapping1 {
 		Actions actions = new Actions(driver);
 		JavascriptExecutor js = (JavascriptExecutor) driver;
 		
-		String source = "jobgether.com";
+		String source = "ycombinator.com";
 
 		
 		driver.get("https://account.ycombinator.com/?continue=https%3A%2F%2Fwww.workatastartup.com%2F");
@@ -205,14 +205,11 @@ public class JobScrapping1 {
 
 	private static WebElement getElementIfExists(WebDriver driver, String xpath) {
 		try {
-			List<WebElement> elements = driver.findElements(By.xpath(xpath));
-			if (elements.size() > 0) {
-				return elements.get(0);
-			}
-		} catch (NoSuchElementException e) {
-			e.getStackTrace();
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+			return wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
+		} catch (Exception e) {
+			return null;
 		}
-		return null;
 	}
 
 	private static void sleepRandom() {
