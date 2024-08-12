@@ -22,12 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.io.FileUtils;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 
-import java.io.File;
-import java.io.IOException;
 
 public class JobScrapping3 {
 	public static void main(String[] args) throws SQLException, ClassNotFoundException {
