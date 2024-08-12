@@ -84,10 +84,6 @@ public class JobScrapping3 {
 						if (jobTitleElement == null) {
 							
 							try{if (i % 35 == 0) {
-								((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
-										driver.findElement(By.xpath(
-												"(//div[@id='offer-body']/parent::div/preceding-sibling::a)[" + i + "]")));
-								
 								WebElement seemore = getElementIfExists(driver,"//a[normalize-space()='See more']");
 								if (seemore != null) {
 									seemore.click();
