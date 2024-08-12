@@ -22,12 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.io.FileUtils;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 
-import java.io.File;
-import java.io.IOException;
 
 public class JobScrapping3 {
 	public static void main(String[] args) throws SQLException, ClassNotFoundException {
@@ -39,9 +34,9 @@ public class JobScrapping3 {
 
 		try {
 			ChromeOptions options = new ChromeOptions();
-//            options.addArguments("--headless");
-//            options.addArguments("--window-size=1920x1080");
-//            options.addArguments("--disable-gpu");
+            options.addArguments("--headless");
+            options.addArguments("--window-size=1920x1080");
+            options.addArguments("--disable-gpu");
 			driver = new ChromeDriver(options);
 
 			String UK = "622a65b4671f2c8b98fac83f";
@@ -89,7 +84,6 @@ public class JobScrapping3 {
 						if (jobTitleElement == null) {
 							
 							try{
-								if(i==140) {}
 								if (i % 35 == 0) {
 								WebElement seemore = getElementIfExists(driver,"//a[normalize-space()='See more']");
 								if (seemore != null) {
