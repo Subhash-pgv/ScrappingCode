@@ -103,8 +103,12 @@ public class JobScrapping3 {
 
 						if (i % 2 == 0 && i <= totalJobCount) {
 							int j = i - 1;
-							((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
-									driver.findElement(By.xpath("(//div[@id='offer-body'])[" + j + "]/div/div/h3")));
+							WebElement scroll = getElementIfExists(driver,
+									"(//div[@id='offer-body'])[" + j + "]/div/div/h3");
+							if (scroll != null) {
+								((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
+										scroll);
+							}
 						}
 
 						if (jobTitleElement != null) {
@@ -120,54 +124,63 @@ public class JobScrapping3 {
 						}
 
 						List<String> tabs = new ArrayList<>(driver.getWindowHandles());
-						driver.switchTo().window(tabs.get(1));
-						jobURL = driver.getCurrentUrl();
 
-						// Extract additional details
-						WebElement jobLocationElement = getElementIfExists(driver,
-								"//div[@id='offer_general_data']//span[contains(.,'Work from:')]/following-sibling::div");
-						if (jobLocationElement != null) {
-							jobLocation = jobLocationElement.getText();
+						try {
 
+							driver.switchTo().window(tabs.get(1));
+							jobURL = driver.getCurrentUrl();
+
+							// Extract additional details
+							WebElement jobLocationElement = getElementIfExists(driver,
+									"//div[@id='offer_general_data']//span[contains(.,'Work from:')]/following-sibling::div");
+							if (jobLocationElement != null) {
+								jobLocation = jobLocationElement.getText();
+
+							}
+
+							WebElement companyNameElement = getElementIfExists(driver,
+									"//div[contains(@class,'flex justify-center')]/following-sibling::span[1]");
+							if (companyNameElement != null) {
+								companyName = companyNameElement.getText();
+							}
+
+							WebElement companyUrlElement = getElementIfExists(driver,
+									"//div[contains(@class,'flex justify-center')]/following-sibling::a");
+							if (companyUrlElement != null) {
+								companyWebsite = companyUrlElement.getAttribute("href");
+							}
+
+							WebElement companySizeElement = getElementIfExists(driver,
+									"//div[contains(@class,'flex justify-center')]/following-sibling::div//span");
+							if (companySizeElement != null) {
+								companySize = companySizeElement.getText();
+							}
+
+							dateCreated = LocalDateTime.now()
+									.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+							List<String> validSizes = Arrays.asList("11 - 50", "2 - 10", "51 - 200");
+
+							// Add job details to the list
+							if (validSizes.contains(companySize)) {
+								jobDetailsList.add(new String[] { jobTitle, jobLocation, jobURL, companyName,
+										companySize, companyWebsite, source, dateCreated });
+							}
+
+							// Close the job detail tab and switch back
+							driver.close();
+						} catch (Exception e) {
+							e.printStackTrace();
+						} finally {
+							driver.switchTo().window(tabs.get(0));
 						}
-
-						WebElement companyNameElement = getElementIfExists(driver,
-								"//div[contains(@class,'flex justify-center')]/following-sibling::span[1]");
-						if (companyNameElement != null) {
-							companyName = companyNameElement.getText();
-						}
-
-						WebElement companyUrlElement = getElementIfExists(driver,
-								"//div[contains(@class,'flex justify-center')]/following-sibling::a");
-						if (companyUrlElement != null) {
-							companyWebsite = companyUrlElement.getAttribute("href");
-						}
-
-						WebElement companySizeElement = getElementIfExists(driver,
-								"//div[contains(@class,'flex justify-center')]/following-sibling::div//span");
-						if (companySizeElement != null) {
-							companySize = companySizeElement.getText();
-						}
-
-						dateCreated = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
-						List<String> validSizes = Arrays.asList("11 - 50", "2 - 10", "51 - 200");
-
-						// Add job details to the list
-						if (validSizes.contains(companySize)) {
-							jobDetailsList.add(new String[] { jobTitle, jobLocation, jobURL, companyName, companySize,
-									companyWebsite, source, dateCreated });
-						}
-
-						// Close the job detail tab and switch back
-						driver.close();
-						driver.switchTo().window(tabs.get(0));
 
 						if (i % 35 == 0) {
 							try {
 								((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
 										driver.findElement(
-												By.xpath("(//div[@id='offer-body']/parent::div/preceding-sibling::a)["+ i + "]")));
+												By.xpath("(//div[@id='offer-body']/parent::div/preceding-sibling::a)["
+														+ i + "]")));
 							} finally {
 								WebElement seemore = getElementIfExists(driver, "//a[normalize-space()='See more']");
 								if (seemore != null) {
@@ -199,7 +212,7 @@ public class JobScrapping3 {
 			}
 
 		} catch (Exception e) {
-		    takeScreenshot(driver,"error");
+			takeScreenshot(driver, "error");
 			System.out.println("Code Not executed completely for -- " + source);
 
 			e.printStackTrace();
@@ -285,18 +298,19 @@ public class JobScrapping3 {
 			e.printStackTrace();
 		}
 	}
-	
-	  private static void takeScreenshot(WebDriver driver, String fileName) {
-	        try {
-	            TakesScreenshot ts = (TakesScreenshot) driver;
-	            File source = ts.getScreenshotAs(OutputType.FILE);
-	            String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
-	            File destination = new File("C:/Users/svegi/eclipse-workspace/WebScrapers/ExtendReports/screenshots/" + fileName + "_" + timestamp + ".png");
-	            FileUtils.copyFile(source, destination);
-	            System.out.println("Screenshot taken: " + destination.getPath());
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-	    }
+
+	private static void takeScreenshot(WebDriver driver, String fileName) {
+		try {
+			TakesScreenshot ts = (TakesScreenshot) driver;
+			File source = ts.getScreenshotAs(OutputType.FILE);
+			String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
+			File destination = new File("C:/Users/svegi/eclipse-workspace/WebScrapers/ExtendReports/screenshots/"
+					+ fileName + "_" + timestamp + ".png");
+			FileUtils.copyFile(source, destination);
+			System.out.println("Screenshot taken: " + destination.getPath());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 }
