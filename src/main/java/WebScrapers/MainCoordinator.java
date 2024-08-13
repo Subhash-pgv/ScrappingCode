@@ -7,7 +7,10 @@ public class MainCoordinator {
     public static void main(String[] args) throws ClassNotFoundException, InterruptedException {
      
         Class<?>[] scrapers = {
-            WebScrapers.testscrap2.class,
+        		  WebScrapers.JobScrapping3.class,
+                  WebScrapers.JobScrapping4.class,
+                  WebScrapers.JobScrapping1.class,
+                  WebScrapers.JobScrapping2.class
            
         };
 
