@@ -3,7 +3,7 @@
   <groupId>WebScrapers</groupId>
   <artifactId>WebScrapers</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  
+
   <dependencies>
     <dependency>
       <groupId>com.microsoft.sqlserver</groupId>
@@ -70,7 +70,7 @@
       <version>5.1.2</version>
     </dependency>
   </dependencies>
-  
+
 <build>
   <plugins>
     <!-- Maven Exec Plugin to run the main class -->

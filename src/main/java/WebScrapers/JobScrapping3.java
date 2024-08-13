@@ -22,7 +22,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.apache.commons.io.FileUtils;
+import java.io.File;
+import java.io.IOException;
 
 public class JobScrapping3 {
 	public static void main(String[] args) throws SQLException, ClassNotFoundException {
@@ -34,9 +38,9 @@ public class JobScrapping3 {
 
 		try {
 			ChromeOptions options = new ChromeOptions();
-            options.addArguments("--headless");
-            options.addArguments("--window-size=1920x1080");
-            options.addArguments("--disable-gpu");
+			options.addArguments("--headless");
+			options.addArguments("--window-size=1920x1080");
+			options.addArguments("--disable-gpu");
 			driver = new ChromeDriver(options);
 
 			String UK = "622a65b4671f2c8b98fac83f";
@@ -50,14 +54,12 @@ public class JobScrapping3 {
 				driver.get("https://jobgether.com/search-offers?locations=" + location
 						+ "&industries=62448b478cb2bb9b3540b791&industries=62448b478cb2bb9b3540b78f");
 				driver.manage().window().maximize();
-				Thread.sleep(8000);
+				WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(80));
 
 				handlePopUp(driver);
 
-				
-
-				WebElement resultCountElement = driver
-						.findElement(By.xpath("//div[contains(@class,'sort_counter_container')]/div/div[1]"));
+				WebElement resultCountElement = getElementIfExists(driver,
+						"//div[contains(@class,'sort_counter_container')]/div/div[1]");
 				String resultText = resultCountElement.getText();
 				String[] parts = resultText.split(" ");
 				int totalJobCount = Integer.parseInt(parts[0].trim());
@@ -75,28 +77,27 @@ public class JobScrapping3 {
 						String companySize = "";
 						String dateCreated = "";
 
-						System.out.println("Adding Jobs for "+source +" please wait until it shows completed.....");
-
-						WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+						System.out.println("Adding Jobs for " + source + " please wait until it shows completed.....");
 
 						WebElement jobTitleElement = getElementIfExists(driver,
 								"(//div[@id='offer-body'])[" + i + "]/div/div/h3");
 						if (jobTitleElement == null) {
-							
-							try{
+
+							try {
 								if (i % 35 == 0) {
-								WebElement seemore = getElementIfExists(driver,"//a[normalize-space()='See more']");
-								if (seemore != null) {
-									seemore.click();
-									jobTitleElement = getElementIfExists(driver,
-											"(//div[@id='offer-body'])[" + i + "]/div/div/h3");
+									WebElement seemore = getElementIfExists(driver,
+											"//a[normalize-space()='See more']");
+									if (seemore != null) {
+										seemore.click();
+										jobTitleElement = getElementIfExists(driver,
+												"(//div[@id='offer-body'])[" + i + "]/div/div/h3");
+									}
+
+									sleepRandom();
 								}
-								
-								sleepRandom();
-							}
-							}catch(Exception e) {
-							System.out.println("inner break perforemed at "+i);
-							break;
+							} catch (Exception e) {
+								System.out.println("inner break perforemed at " + i);
+								break;
 							}
 						}
 
@@ -110,8 +111,6 @@ public class JobScrapping3 {
 							jobTitle = jobTitleElement.getText();
 						}
 
-						wait.until(ExpectedConditions.presenceOfElementLocated(
-								By.xpath("(//div[@id='offer-body']/parent::div/preceding-sibling::a)[" + i + "]")));
 						WebElement jobLinkElement = getElementIfExists(driver,
 								"(//div[@id='offer-body']/parent::div/preceding-sibling::a)[" + i + "]");
 
@@ -129,7 +128,7 @@ public class JobScrapping3 {
 								"//div[@id='offer_general_data']//span[contains(.,'Work from:')]/following-sibling::div");
 						if (jobLocationElement != null) {
 							jobLocation = jobLocationElement.getText();
-							
+
 						}
 
 						WebElement companyNameElement = getElementIfExists(driver,
@@ -150,9 +149,7 @@ public class JobScrapping3 {
 							companySize = companySizeElement.getText();
 						}
 
-						LocalDateTime now = LocalDateTime.now();
-						DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-						dateCreated = now.format(formatter);
+						dateCreated = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
 						List<String> validSizes = Arrays.asList("11 - 50", "2 - 10", "51 - 200");
 
@@ -162,86 +159,87 @@ public class JobScrapping3 {
 									companyWebsite, source, dateCreated });
 						}
 
+						// Close the job detail tab and switch back
 						driver.close();
 						driver.switchTo().window(tabs.get(0));
 
-						if (i % 35 == 0||jobLocationElement == null) {
-							((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
-									driver.findElement(By.xpath(
-											"(//div[@id='offer-body']/parent::div/preceding-sibling::a)[" + i + "]")));
-							
-							WebElement seemore = getElementIfExists(driver,"//a[normalize-space()='See more']");
-							if (seemore != null) {
-								seemore.click();
+						if (i % 35 == 0) {
+							try {
+								((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
+										driver.findElement(
+												By.xpath("(//div[@id='offer-body']/parent::div/preceding-sibling::a)["+ i + "]")));
+							} finally {
+								WebElement seemore = getElementIfExists(driver, "//a[normalize-space()='See more']");
+								if (seemore != null) {
+									seemore.click();
+								}
 							}
-							
+
 							sleepRandom();
-							
-							((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
-									driver.findElement(By.xpath(
-											"(//div[@id='offer-body']/parent::div/preceding-sibling::a)[" + i + "]")));
+
 						}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
-					switch(location) {
-					case "622a65b4671f2c8b98fac83f" :
-						System.out.println("Code Not executed completely for UK location.--"+ source);
-						 break; 
-					case "622a65bd671f2c8b98faca1a" :
-						System.out.println("Code Not executed completely for USA location.--"+ source);
-						 break;
-					case "622a659af0bac38678ed1398" :
-						System.out.println("Code Not executed completely for EUROPE location.--"+ source);
-						 break;
-					case "622a65b0671f2c8b98fac759" :
-						System.out.println("Code Not executed completely for AUSTRALIA location.--"+ source);
-						 break;
+					switch (location) {
+					case "622a65b4671f2c8b98fac83f":
+						System.out.println("Code Not executed completely for UK location.--" + source);
+						break;
+					case "622a65bd671f2c8b98faca1a":
+						System.out.println("Code Not executed completely for USA location.--" + source);
+						break;
+					case "622a659af0bac38678ed1398":
+						System.out.println("Code Not executed completely for EUROPE location.--" + source);
+						break;
+					case "622a65b0671f2c8b98fac759":
+						System.out.println("Code Not executed completely for AUSTRALIA location.--" + source);
+						break;
 					}
-				} 
+				}
 			}
 
 		} catch (Exception e) {
-			System.out.println("Code Not executed completely for -- "+ source);
-			
+		    takeScreenshot(driver,"error");
+			System.out.println("Code Not executed completely for -- " + source);
+
 			e.printStackTrace();
 		} finally {
-				// SQL connection setup
-				Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-				String connectionURL = "jdbc:sqlserver://10.0.2.34:1433;Database=Automation;User=mailscan;Password=MailScan@343260;encrypt=true;trustServerCertificate=true";
-				connection = DriverManager.getConnection(connectionURL);
+			// SQL connection setup
+			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+			String connectionURL = "jdbc:sqlserver://10.0.2.34:1433;Database=Automation;User=mailscan;Password=MailScan@343260;encrypt=true;trustServerCertificate=true";
+			connection = DriverManager.getConnection(connectionURL);
 
-				// SQL queries
-				String checkSQL = "SELECT COUNT(*) FROM JobListings WHERE jobUrl = ?";
-				ResultSet resultSet = null;
-				// Check and insert jobs into the database
-				String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocations, jobUrl, companyName, employeeCount, companyWebsite, source, dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-				for (String[] jobDetails : jobDetailsList) {
-					String jobURL = jobDetails[2];
+			// SQL queries
+			String checkSQL = "SELECT COUNT(*) FROM JobListings WHERE jobUrl = ?";
+			ResultSet resultSet = null;
+			// Check and insert jobs into the database
+			String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocations, jobUrl, companyName, employeeCount, companyWebsite, source, dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+			for (String[] jobDetails : jobDetailsList) {
+				String jobURL = jobDetails[2];
 
-					// Check if job URL already exists
-					PreparedStatement checkStatement = connection.prepareStatement(checkSQL);
-					checkStatement.setString(1, jobURL);
-					resultSet = checkStatement.executeQuery();
-					if (resultSet.next() && resultSet.getInt(1) == 0) {
-						// Insert new job listing
-						PreparedStatement insertStatement = connection.prepareStatement(insertSQL);
-						for (int j = 0; j < jobDetails.length; j++) {
-							insertStatement.setString(j + 1, jobDetails[j]);
-						}
-						insertStatement.executeUpdate();
-						insertStatement.close();
-						totalJobsAppended++;
+				// Check if job URL already exists
+				PreparedStatement checkStatement = connection.prepareStatement(checkSQL);
+				checkStatement.setString(1, jobURL);
+				resultSet = checkStatement.executeQuery();
+				if (resultSet.next() && resultSet.getInt(1) == 0) {
+					// Insert new job listing
+					PreparedStatement insertStatement = connection.prepareStatement(insertSQL);
+					for (int j = 0; j < jobDetails.length; j++) {
+						insertStatement.setString(j + 1, jobDetails[j]);
 					}
-					resultSet.close();
-					checkStatement.close();
+					insertStatement.executeUpdate();
+					insertStatement.close();
+					totalJobsAppended++;
 				}
-				if (totalJobsAppended != 0) {
-					System.out.println(totalJobsAppended + " jobs added to DB. --"+ source);
-				} else {
-					System.out.println("No new jobs found.--"+ source);
-				}
-		
+				resultSet.close();
+				checkStatement.close();
+			}
+			if (totalJobsAppended != 0) {
+				System.out.println(totalJobsAppended + " jobs added to DB. --" + source);
+			} else {
+				System.out.println("No new jobs found.--" + source);
+			}
+
 			if (driver != null) {
 				driver.quit();
 			}
@@ -250,7 +248,7 @@ public class JobScrapping3 {
 					connection.close();
 				} catch (Exception e) {
 					e.printStackTrace();
-					 
+
 				}
 			}
 		}
@@ -281,12 +279,24 @@ public class JobScrapping3 {
 			WebElement closeButton = getElementIfExists(driver, "//button[@data-pc-section='closebutton']");
 			if (closeButton != null) {
 				closeButton.click();
-				System.out.println("pop-up closed. --"+ source);
+				System.out.println("pop-up closed. --" + source);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	 
+	  private static void takeScreenshot(WebDriver driver, String fileName) {
+	        try {
+	            TakesScreenshot ts = (TakesScreenshot) driver;
+	            File source = ts.getScreenshotAs(OutputType.FILE);
+	            String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
+	            File destination = new File("C:/Users/svegi/eclipse-workspace/WebScrapers/ExtendReports/screenshots/" + fileName + "_" + timestamp + ".png");
+	            FileUtils.copyFile(source, destination);
+	            System.out.println("Screenshot taken: " + destination.getPath());
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
 }
