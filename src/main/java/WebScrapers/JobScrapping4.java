@@ -64,7 +64,10 @@ public class JobScrapping4 {
 
 			} catch (Exception e) {
 				e.printStackTrace();
-				takeScreenshot( driver,"error");
+				// takeScreenshot( driver,"error");
+				
+				 File screenshotFile = takeScreenshotGit(driver, "error");
+				 commitScreenshot(screenshotFile);
 			}
 
 			for (int i = 1; i <= totalJobCount; i++) {
@@ -164,7 +167,10 @@ public class JobScrapping4 {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			takeScreenshot( driver,"error");
+			// takeScreenshot( driver,"error");
+			
+			 File screenshotFile = takeScreenshotGit(driver, "error");
+			 commitScreenshot(screenshotFile);
 		} finally {
 
 			try {
@@ -266,4 +272,35 @@ public class JobScrapping4 {
 			e.printStackTrace();
 		}
 	}
+	
+	 private static File takeScreenshotGit(WebDriver driver, String fileName) {
+	        File screenshotFile = null;
+	        try {
+	            TakesScreenshot ts = (TakesScreenshot) driver;
+	            screenshotFile = ts.getScreenshotAs(OutputType.FILE);
+	            String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
+	            
+	            // Modify this path to your Git folder path
+	            File destination = new File("path/to/your/git/repo/screenshots/"
+	                    + fileName + "_" + timestamp + ".png");
+	            
+	            FileUtils.copyFile(screenshotFile, destination);
+	            System.out.println("Screenshot taken: " + destination.getPath());
+	            
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	        return screenshotFile;
+	    }
+
+	    private static void commitScreenshot(File screenshotFile) {
+	        try {
+	            String command = "git add " + screenshotFile.getPath() +
+	                             " && git commit -m 'Added screenshot for error' " +
+	                             " && git push";
+	            Runtime.getRuntime().exec(command);
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	    }
 }

@@ -97,7 +97,10 @@ public class JobScrapping3 {
 								}
 							} catch (Exception e) {
 								System.out.println("inner break perforemed at " + i);
-								takeScreenshot( driver,"error");
+								// takeScreenshot( driver,"error");
+								
+								 File screenshotFile = takeScreenshotGit(driver, "error");
+								 commitScreenshot(screenshotFile);
 								break;
 							}
 						}
@@ -172,7 +175,10 @@ public class JobScrapping3 {
 							driver.close();
 						} catch (Exception e) {
 							e.printStackTrace();
-							takeScreenshot( driver,"error");
+							// takeScreenshot( driver,"error");
+							
+							 File screenshotFile = takeScreenshotGit(driver, "error");
+							 commitScreenshot(screenshotFile);
 						} finally {
 							driver.switchTo().window(tabs.get(0));
 						}
@@ -197,7 +203,11 @@ public class JobScrapping3 {
 				} catch (Exception e) {
 					e.printStackTrace();
 					
-					takeScreenshot( driver,"error");
+					// takeScreenshot( driver,"error");
+					
+					 File screenshotFile = takeScreenshotGit(driver, "error");
+					 commitScreenshot(screenshotFile);
+					 
 					switch (location) {
 					case "622a65b4671f2c8b98fac83f":
 						System.out.println("Code Not executed completely for UK location.--" + source);
@@ -216,7 +226,10 @@ public class JobScrapping3 {
 			}
 
 		} catch (Exception e) {
-			takeScreenshot(driver, "error");
+			// takeScreenshot( driver,"error");
+			
+			 File screenshotFile = takeScreenshotGit(driver, "error");
+			 commitScreenshot(screenshotFile);
 			System.out.println("Code Not executed completely for -- " + source);
 
 			e.printStackTrace();
@@ -316,5 +329,36 @@ public class JobScrapping3 {
 			e.printStackTrace();
 		}
 	}
+	
+	 private static File takeScreenshotGit(WebDriver driver, String fileName) {
+	        File screenshotFile = null;
+	        try {
+	            TakesScreenshot ts = (TakesScreenshot) driver;
+	            screenshotFile = ts.getScreenshotAs(OutputType.FILE);
+	            String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
+	            
+	            // Modify this path to your Git folder path
+	            File destination = new File("path/to/your/git/repo/screenshots/"
+	                    + fileName + "_" + timestamp + ".png");
+	            
+	            FileUtils.copyFile(screenshotFile, destination);
+	            System.out.println("Screenshot taken: " + destination.getPath());
+	            
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	        return screenshotFile;
+	    }
+
+	    private static void commitScreenshot(File screenshotFile) {
+	        try {
+	            String command = "git add " + screenshotFile.getPath() +
+	                             " && git commit -m 'Added screenshot for error' " +
+	                             " && git push";
+	            Runtime.getRuntime().exec(command);
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	    }
 
 }
