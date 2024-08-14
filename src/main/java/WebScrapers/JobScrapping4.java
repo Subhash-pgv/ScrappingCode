@@ -255,7 +255,7 @@ public class JobScrapping4 {
 			return true; // If it contains minute or second, it is within 3 days
 		} else if (relativeTime.contains("day")) {
 			String[] parts = relativeTime.split(" ");
-			int days = Integer.parseInt(parts[1]); // Get the number of days
+			int days = Integer.parseInt(parts[0]); // Get the number of days
 			return days < 3; // Check if it's less than 3 days
 		}
 		return false; // Default case, if not matched
@@ -283,7 +283,7 @@ public class JobScrapping4 {
 	            String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
 	            
 	            // Modify this path to your Git folder path
-	            File destination = new File("ExtendReports/screenshots"
+	            File destination = new File("path/to/your/git/repo/screenshots/"
 	                    + fileName + "_" + timestamp + ".png");
 	            
 	            FileUtils.copyFile(screenshotFile, destination);
