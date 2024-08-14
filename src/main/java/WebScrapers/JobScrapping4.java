@@ -18,8 +18,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.NumberFormat;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -281,7 +283,7 @@ public class JobScrapping4 {
 	            String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
 	            
 	            // Modify this path to your Git folder path
-	            File destination = new File("path/to/your/git/repo/screenshots/"
+	            File destination = new File("ExtendReports/screenshots"
 	                    + fileName + "_" + timestamp + ".png");
 	            
 	            FileUtils.copyFile(screenshotFile, destination);
@@ -293,14 +295,25 @@ public class JobScrapping4 {
 	        return screenshotFile;
 	    }
 
-	    private static void commitScreenshot(File screenshotFile) {
-	        try {
-	            String command = "git add " + screenshotFile.getPath() +
-	                             " && git commit -m 'Added screenshot for error' " +
-	                             " && git push";
-	            Runtime.getRuntime().exec(command);
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-	    }
+	 private static void commitScreenshot(File screenshotFile) {
+		    try {
+		        String command = "cmd /c git add \"" + screenshotFile.getPath() + "\" && " +
+		                         "git commit -m \"Added screenshot for error\" && " +
+		                         "git push";
+		        
+		        // Run the command in the terminal
+		        Process process = Runtime.getRuntime().exec(command);
+		        process.waitFor(); // Wait for the process to finish
+		        
+		        // Optional: Check if there are any errors in the output
+		        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+		        String line;
+		        while ((line = reader.readLine()) != null) {
+		            System.out.println(line);
+		        }
+		        
+		    } catch (IOException | InterruptedException e) {
+		        e.printStackTrace();
+		    }
+		}
 }
