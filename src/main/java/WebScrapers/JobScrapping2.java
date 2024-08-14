@@ -1,20 +1,20 @@
 package WebScrapers;
 
+import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.interactions.Actions;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Random;
-import java.io.FileWriter;
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -33,7 +33,7 @@ public class JobScrapping2 {
         options.addArguments("--window-size=1920x1080");
         options.addArguments("--disable-gpu");
         WebDriver driver = new ChromeDriver(options);
-        Actions actions = new Actions(driver);
+        
         
         JavascriptExecutor js = (JavascriptExecutor) driver;
         
@@ -134,6 +134,7 @@ public class JobScrapping2 {
         }catch(Exception e) {
         	System.out.println("Code did not execute completely.-- "+source);
 			e.printStackTrace();
+			takeScreenshot( driver,"error");
         }finally {
         	
         	try {
@@ -219,4 +220,18 @@ public class JobScrapping2 {
             e.printStackTrace();
         }
     }
+    
+	private static void takeScreenshot(WebDriver driver, String fileName) {
+		try {
+			TakesScreenshot ts = (TakesScreenshot) driver;
+			File source = ts.getScreenshotAs(OutputType.FILE);
+			String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
+			File destination = new File("C:/Users/svegi/eclipse-workspace/WebScrapers/ExtendReports/screenshots/"
+					+ fileName + "_" + timestamp + ".png");
+			FileUtils.copyFile(source, destination);
+			System.out.println("Screenshot taken: " + destination.getPath());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

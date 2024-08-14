@@ -54,8 +54,8 @@ public class JobScrapping3 {
 				driver.get("https://jobgether.com/search-offers?locations=" + location
 						+ "&industries=62448b478cb2bb9b3540b791&industries=62448b478cb2bb9b3540b78f");
 				driver.manage().window().maximize();
-				WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(80));
-
+				
+				Thread.sleep(8000);			
 				handlePopUp(driver);
 
 				WebElement resultCountElement = getElementIfExists(driver,
@@ -77,7 +77,7 @@ public class JobScrapping3 {
 						String companySize = "";
 						String dateCreated = "";
 
-						System.out.println("Adding Jobs for " + source + " please wait until it shows completed.....");
+						System.out.println("Adding Jobs for \""+source + "\" please wait until it shows completed.....");
 
 						WebElement jobTitleElement = getElementIfExists(driver,
 								"(//div[@id='offer-body'])[" + i + "]/div/div/h3");
@@ -97,6 +97,7 @@ public class JobScrapping3 {
 								}
 							} catch (Exception e) {
 								System.out.println("inner break perforemed at " + i);
+								takeScreenshot( driver,"error");
 								break;
 							}
 						}
@@ -171,6 +172,7 @@ public class JobScrapping3 {
 							driver.close();
 						} catch (Exception e) {
 							e.printStackTrace();
+							takeScreenshot( driver,"error");
 						} finally {
 							driver.switchTo().window(tabs.get(0));
 						}
@@ -194,6 +196,8 @@ public class JobScrapping3 {
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
+					
+					takeScreenshot( driver,"error");
 					switch (location) {
 					case "622a65b4671f2c8b98fac83f":
 						System.out.println("Code Not executed completely for UK location.--" + source);

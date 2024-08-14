@@ -1,7 +1,10 @@
 package WebScrapers;
 
+import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -10,6 +13,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.interactions.Actions;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -121,6 +125,7 @@ public class JobScrapping1 {
 		} catch (Exception e) {
 			System.out.println("Code did not execute completely.-- "+source);
 			e.printStackTrace();
+			takeScreenshot( driver,"error");
 		} finally {
 			
 			try {
@@ -176,6 +181,7 @@ public class JobScrapping1 {
 			} catch (Exception e) {
 				System.out.println("Error in Jobs adding to data base "+source);
 				e.printStackTrace();
+				
 			}
 		}
 	}
@@ -237,5 +243,19 @@ public class JobScrapping1 {
 		wait.until(ExpectedConditions
 				.presenceOfElementLocated(By.xpath("//p[contains(normalize-space(.), 'matching startups')]")));
 		sleepRandom();
+	}
+	
+	private static void takeScreenshot(WebDriver driver, String fileName) {
+		try {
+			TakesScreenshot ts = (TakesScreenshot) driver;
+			File source = ts.getScreenshotAs(OutputType.FILE);
+			String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
+			File destination = new File("C:/Users/svegi/eclipse-workspace/WebScrapers/ExtendReports/screenshots/"
+					+ fileName + "_" + timestamp + ".png");
+			FileUtils.copyFile(source, destination);
+			System.out.println("Screenshot taken: " + destination.getPath());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
