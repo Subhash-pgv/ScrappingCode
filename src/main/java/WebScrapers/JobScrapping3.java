@@ -67,6 +67,8 @@ public class JobScrapping3 {
 				String[] parts = resultText.split(" ");
 				int totalJobCount = Integer.parseInt(parts[0].trim());
 				System.out.println(totalJobCount);
+				
+				
 
 				try {
 					for (int i = 1; i <= totalJobCount; i++) {
@@ -79,11 +81,26 @@ public class JobScrapping3 {
 						source = "jobgether.com";
 						String companySize = "";
 						String dateCreated = "";
+						String relativeTime = "";
 
 						System.out.println("Adding Jobs for \""+source + "\" please wait until it shows completed.....");
 
-						WebElement jobTitleElement = getElementIfExists(driver,
-								"(//div[@id='offer-body'])[" + i + "]/div/div/h3");
+						
+						((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);","(//div[@id='offer-body'])[" + i + "]/div/div/h3");
+						
+						
+						WebElement dateElement = getElementIfExists(driver,
+								"//div[@id='offer-body']//span[contains(@class,'text-xs pt-1')]");
+						if (dateElement != null) {
+							relativeTime = dateElement.getText();
+						}
+						
+					
+							
+						WebElement jobTitleElement = getElementIfExists(driver,"(//div[@id='offer-body'])[" + i + "]/div/div/h3");
+							
+							
+						
 						if (jobTitleElement == null) {
 
 							try {
@@ -109,15 +126,15 @@ public class JobScrapping3 {
 						}
 
 						if (i % 2 == 0 && i <= totalJobCount) {
-							int j = i - 1;
-							WebElement scroll = getElementIfExists(driver,
-									"(//div[@id='offer-body'])[" + j + "]/div/div/h3");
-							if (scroll != null) {
+							
+							if (jobTitleElement != null) {
 								((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
-										scroll);
+										jobTitleElement);
 							}
 						}
 
+		if ((isLessThanThreeDays(relativeTime))) {
+						
 						if (jobTitleElement != null) {
 							jobTitle = jobTitleElement.getText();
 						}
@@ -173,6 +190,7 @@ public class JobScrapping3 {
 								jobDetailsList.add(new String[] { jobTitle, jobLocation, jobURL, companyName,
 										companySize, companyWebsite, source, dateCreated });
 							}
+						
 
 							// Close the job detail tab and switch back
 							driver.close();
@@ -185,6 +203,7 @@ public class JobScrapping3 {
 						} finally {
 							driver.switchTo().window(tabs.get(0));
 						}
+		}
 
 						if (i % 35 == 0) {
 							try {
@@ -229,7 +248,7 @@ public class JobScrapping3 {
 			}
 
 		} catch (Exception e) {
-			// takeScreenshot( driver,"error");
+//			 takeScreenshot( driver,"error");
 			
 			 File screenshotFile = takeScreenshotGit(driver, "error");
 			 commitScreenshot(screenshotFile);
@@ -374,6 +393,18 @@ public class JobScrapping3 {
 		        e.printStackTrace();
 		    }
 		}
+	 
+	 private static boolean isLessThanThreeDays(String relativeTime) {
+			if (relativeTime.contains("day ago")||relativeTime.contains("Today")) {
+				return true; // If it contains minute or second, it is within 3 days
+			} else if (relativeTime.contains("days ago")) {
+				String[] parts = relativeTime.split(" ");
+				int days = Integer.parseInt(parts[0]); // Get the number of days
+				return days < 10; // Check if it's less than 3 days
+			}
+			return false; // Default case, if not matched
+		}
+		
 
 
 }

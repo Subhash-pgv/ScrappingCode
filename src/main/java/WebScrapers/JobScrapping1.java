@@ -66,6 +66,7 @@ public class JobScrapping1 {
 
 		openUrl(driver);
 		int totalmatching = getTotalMatchingStartups(driver);
+		System.out.println("total job records in \"ycombinator\" is : "+ totalmatching);
 		List<String[]> jobDetailsList = new ArrayList<>();
 
 		Connection connection = null;

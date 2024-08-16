@@ -65,6 +65,9 @@ public class JobScrapping2 {
         int[] sections = {2, 17, 18};
         int totalJobsAppended = 0;
         int totalJobFinds =0;
+      
+        
+        
         
     	
         
@@ -73,47 +76,83 @@ public class JobScrapping2 {
         try {
         for (int sectionId : sections) {
         	
+        	
+        	
         	String companyName = null;
             String jobTitle = null;
             String jobLocation = null;
             String jobURL = null;
-            String employeeCount=null;
+            String employeeCount="1-50";
             String companyWebsite= null;
             source= "weworkremotely.com";
             String dateCreated = null;
             
-        	 System.out.println("Adding Jobs for "+source +" please wait until it shows completed.....");
+            String viewAll=null;
+//           try { 
+            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",driver.findElement(By.xpath("//section[@id='category-" + sectionId + "']//li[@class='view-all']/a")));
+//           }catch(Exception e){
+//        	   switch (sectionId) {
+//				case 2:
+//					System.out.println(" No jobs foiuns for Full-stack programming ");
+//					break;
+//				case 17:
+//					System.out.println(" No jobs foiuns for  Front-end programming ");
+//					break;
+//				case 18:
+//					System.out.println(" No jobs foiuns for back-end programming ");
+//					break;
+//				}
+//        	 }
+           
+            WebElement viewAllElement  = getElementIfExists(driver, "//section[@id='category-" + sectionId + "']//li[@class='view-all']/a");
+            if (viewAllElement != null) {
+            	viewAll= viewAllElement.getAttribute("href");
+            	
+            }
+            
+            String script = "window.open(arguments[0], '_blank');";
+	        js.executeScript(script, viewAll);
+	        sleepRandom();
+	        
+	        tabs = new ArrayList<>(driver.getWindowHandles());
+			driver.switchTo().window(tabs.get(1));
+            
+        	
         	List<WebElement> resultCountElement = driver.findElements(By.xpath("//section[@id='category-" + sectionId + "']//li/a//span[@class='title']"));
    
         	for (int i = 1; i <= resultCountElement.size(); i++) {
+        		
+        		System.out.println("Adding Jobs for "+source +" please wait until it shows completed.....");
+        		
+        		((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",driver.findElement(By.xpath("(//section[@id='category-" + sectionId + "']//li/a//span[@class='title'])[" + i + "]")));
 
                 // Handle each element and check if it exists
-                WebElement companyNames = getElementIfExists(driver, "(//section[@id='category-" + sectionId + "']//li[" + i + "]/a//span[@class='company'][1])");
+                WebElement companyNames = getElementIfExists(driver, "(//section[@id='category-" + sectionId + "']//li/a//span[@class='company'][1])[" + i + "]");
                 if (companyNames != null) {
                     companyName = companyNames.getText();
                 }
 
-                WebElement jobTitles = getElementIfExists(driver, "(//section[@id='category-" + sectionId + "']//li[" + i + "]/a//span[@class='title'])");
+                WebElement jobTitles = getElementIfExists(driver, "(//section[@id='category-" + sectionId + "']//li/a//span[@class='title'])[" + i + "]");
                 if (jobTitles != null) {
                     jobTitle = jobTitles.getText();
                 }
 
-                WebElement jobLocations = getElementIfExists(driver, "(//section[@id='category-" + sectionId + "']//li[" + i + "]/a//span[@class='region company'])");
+                WebElement jobLocations = getElementIfExists(driver, "(//section[@id='category-" + sectionId + "']//li/a//span[@class='region company'])[" + i + "]");
                 if (jobLocations != null) {
                     jobLocation = jobLocations.getText();
                 }
 
-                WebElement jobURLs = getElementIfExists(driver, "(//section[@id='category-" + sectionId + "']//li[" + i + "]/a//span[@class='region company'])/parent::a");
+                WebElement jobURLs = getElementIfExists(driver, "(//section[@id='category-" + sectionId + "']//li/a//span[@class='region company'])[" + i + "]/parent::a");
                 if (jobURLs != null) {
                     jobURL = jobURLs.getAttribute("href");
                 }
                 
-		        String script = "window.open(arguments[0], '_blank');";
+		       
 		        js.executeScript(script, jobURL);
 		        sleepRandom();
 
 				tabs = new ArrayList<>(driver.getWindowHandles());
-				driver.switchTo().window(tabs.get(1));
+				driver.switchTo().window(tabs.get(2));
 				
 				
 				WebElement CompanyWebsites  = getElementIfExists(driver, "//div[@class='company-card border-box']//a[normalize-space()='Website']");
@@ -129,15 +168,19 @@ public class JobScrapping2 {
 						companyWebsite, source, dateCreated});
 				
 				totalJobFinds++;
+				
+				driver.close();
+				driver.switchTo().window(tabs.get(1));
         	}	
-	
+        	driver.close();
+			driver.switchTo().window(tabs.get(0));
         }
         
         }catch(Exception e) {
         	System.out.println("Code did not execute completely.-- "+source);
 			e.printStackTrace();
 			
-			// takeScreenshot( driver,"error");
+		//	 takeScreenshot( driver,"error");
 			
 			 File screenshotFile = takeScreenshotGit(driver, "error");
 			 commitScreenshot(screenshotFile);
