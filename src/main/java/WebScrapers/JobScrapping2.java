@@ -93,13 +93,13 @@ public class JobScrapping2 {
 //           }catch(Exception e){
 //        	   switch (sectionId) {
 //				case 2:
-//					System.out.println(" No jobs foiuns for Full-stack programming ");
+//					System.out.println(" No jobs found for Full-stack programming ");
 //					break;
 //				case 17:
-//					System.out.println(" No jobs foiuns for  Front-end programming ");
+//					System.out.println(" No jobs found for  Front-end programming ");
 //					break;
 //				case 18:
-//					System.out.println(" No jobs foiuns for back-end programming ");
+//					System.out.println(" No jobs found for back-end programming ");
 //					break;
 //				}
 //        	 }
@@ -311,11 +311,11 @@ public class JobScrapping2 {
 		        String command = "cmd /c git add \"" + screenshotFile.getPath() + "\" && " +
 		                         "git commit -m \"Added screenshot for error\" && " +
 		                         "git push";
-		        
+		        System.out.println("test 1 ");
 		        // Run the command in the terminal
 		        Process process = Runtime.getRuntime().exec(command);
 		        process.waitFor(); // Wait for the process to finish
-		        
+		        System.out.println("test 1 ");
 		        // Optional: Check if there are any errors in the output
 		        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 		        String line;
