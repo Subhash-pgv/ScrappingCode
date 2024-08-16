@@ -294,7 +294,7 @@ public class JobScrapping2 {
 	            String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
 	            
 	            // Modify this path to your Git folder path
-	            File destination = new File("ExtendReports/screenshots"
+	            File destination = new File("Automation/ExtendReports/screenshots/"
 	                    + fileName + "_" + timestamp + ".png");
 	            
 	            FileUtils.copyFile(screenshotFile, destination);
