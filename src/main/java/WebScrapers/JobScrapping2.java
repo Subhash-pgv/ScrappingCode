@@ -88,21 +88,21 @@ public class JobScrapping2 {
             String dateCreated = null;
             
             String viewAll=null;
-//           try { 
+           try { 
             ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",driver.findElement(By.xpath("//section[@id='category-" + sectionId + "']//li[@class='view-all']/a")));
-//           }catch(Exception e){
-//        	   switch (sectionId) {
-//				case 2:
-//					System.out.println(" No jobs found for Full-stack programming ");
-//					break;
-//				case 17:
-//					System.out.println(" No jobs found for  Front-end programming ");
-//					break;
-//				case 18:
-//					System.out.println(" No jobs found for back-end programming ");
-//					break;
-//				}
-//        	 }
+           }catch(Exception e){
+        	   switch (sectionId) {
+				case 2:
+					System.out.println(" No jobs found for Full-stack programming ");
+					break;
+				case 17:
+					System.out.println(" No jobs found for  Front-end programming ");
+					break;
+				case 18:
+					System.out.println(" No jobs found for back-end programming ");
+					break;
+				}
+        	 }
            
             WebElement viewAllElement  = getElementIfExists(driver, "//section[@id='category-" + sectionId + "']//li[@class='view-all']/a");
             if (viewAllElement != null) {
