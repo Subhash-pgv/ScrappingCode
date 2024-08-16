@@ -8,8 +8,8 @@ public class MainCoordinator {
      
         Class<?>[] scrapers = {
 //        		  WebScrapers.JobScrapping3.class,
-//                  WebScrapers.JobScrapping4.class,
-//                  WebScrapers.JobScrapping1.class,
+                  WebScrapers.JobScrapping4.class,
+                  WebScrapers.JobScrapping1.class,
                   WebScrapers.JobScrapping2.class
            
         };
