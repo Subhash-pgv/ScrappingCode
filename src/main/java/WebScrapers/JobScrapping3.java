@@ -301,7 +301,7 @@ class JobScraperTask1 implements Runnable {
 			TakesScreenshot ts = (TakesScreenshot) driver;
 			File sources = ts.getScreenshotAs(OutputType.FILE);
 			String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
-			File destination = new File("C:/Users/svegi/eclipse-workspace/WebScrapers/ExtendReports/screenshots/"
+			File destination = new File("C:/Users/user01/Desktop/Automation Scrapping Code Error Screenshots/"
 					+ fileName + "_" + timestamp + ".png");
 			FileUtils.copyFile(sources, destination);
 			System.out.println("Screenshot taken in  :" + destination.getPath());
