@@ -19,217 +19,169 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.apache.commons.io.FileUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 public class JobScrapping3 {
+
+	private static final String[] LOCATIONS = { 
+			"622a659af0bac38678ed1398", // Europe
+			"622a65b0671f2c8b98fac759", // Australia
+			"622a65b4671f2c8b98fac83f", // UK
+			"622a65bd671f2c8b98faca1a" // USA
+	};
+
 	public static void main(String[] args) throws SQLException, ClassNotFoundException {
+		// Create a thread pool with a fixed number of threads, one for each location
+		ExecutorService executor = Executors.newFixedThreadPool(LOCATIONS.length);
+
+		// Submit a new task for each location to the thread pool
+		for (String location : LOCATIONS) {
+			executor.execute(new JobScraperTask1(location));
+		}
+
+		// Shutdown the executor service after all tasks are completed
+		executor.shutdown();
+	}
+}
+
+class JobScraperTask1 implements Runnable {
+
+	private String location;
+
+	public JobScraperTask1(String location) {
+		this.location = location;
+	}
+
+	@Override
+	public void run() {
 		WebDriver driver = null;
 		Connection connection = null;
-		int totalJobsAppended = 0;
-		String source = "jobgether.com";
 		List<String[]> jobDetailsList = new ArrayList<>();
+		String source = "jobgether.com";
 
 		try {
 			ChromeOptions options = new ChromeOptions();
-			options.addArguments("--headless");
-			options.addArguments("--window-size=1920x1080");
-			options.addArguments("--disable-gpu");
+            options.addArguments("--headless");
+            options.addArguments("--window-size=1920x1080");
+            options.addArguments("--disable-gpu");
 			driver = new ChromeDriver(options);
 
-			String UK = "622a65b4671f2c8b98fac83f";
-			String USA = "622a65bd671f2c8b98faca1a";
-			String EUROPE = "622a659af0bac38678ed1398";
-			String Australia = "622a65b0671f2c8b98fac759";
+			driver.get("https://jobgether.com/search-offers?locations=" + location
+					+ "&industries=62448b478cb2bb9b3540b791&industries=62448b478cb2bb9b3540b78f&sort=date");
+			driver.manage().window().maximize();
 
-			String[] locations = { EUROPE, Australia, UK, USA };
-			System.out.println("ADDING JOBS FROM \"jobgether.com\"");
-			for (String location : locations) {
-				driver.get("https://jobgether.com/search-offers?locations=" + location
-						+ "&industries=62448b478cb2bb9b3540b791&industries=62448b478cb2bb9b3540b78f");
-				driver.manage().window().maximize();
-				
-				Thread.sleep(8000);			
-				handlePopUp(driver);
+			Thread.sleep(8000);
+			handlePopUp(driver);
 
-				WebElement resultCountElement = getElementIfExists(driver,
-						"//div[contains(@class,'sort_counter_container')]/div/div[1]");
-				String resultText = resultCountElement.getText();
-				String[] parts = resultText.split(" ");
-				int totalJobCount = Integer.parseInt(parts[0].trim());
-				System.out.println(totalJobCount);
-				
-				
+			WebElement resultCountElement = getElementIfExists(driver,
+					"//div[contains(@class,'sort_counter_container')]/div/div[1]");
+			String resultText = resultCountElement.getText();
+			String[] parts = resultText.split(" ");
+			int totalJobCount = Integer.parseInt(parts[0].trim());
+
+			for (int i = 1; i <= totalJobCount; i++) {
+
+				System.out.println("Adding Jobs for \"" + source + "\" please wait until it shows completed.....");
 
 				try {
-					for (int i = 1; i <= totalJobCount; i++) {
+					List<WebElement> TotalJobsOnPage = getElementsIfExists(driver,
+							"//div[@id='offer-body']/div/div/h3");
 
-						String companyName = "";
-						String jobTitle = "";
-						String jobLocation = "";
-						String jobURL = "";
-						String companyWebsite = "";
-						source = "jobgether.com";
-						String companySize = "";
-						String dateCreated = "";
-						String relativeTime = "";
-
-						System.out.println("Adding Jobs for \""+source + "\" please wait until it shows completed.....");
-
-						
-						((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);","(//div[@id='offer-body'])[" + i + "]/div/div/h3");
-						
-						
-						WebElement dateElement = getElementIfExists(driver,
-								"//div[@id='offer-body']//span[contains(@class,'text-xs pt-1')]");
-						if (dateElement != null) {
-							relativeTime = dateElement.getText();
-						}
-						
-					
-							
-						WebElement jobTitleElement = getElementIfExists(driver,"(//div[@id='offer-body'])[" + i + "]/div/div/h3");
-							
-							
-						
-						if (jobTitleElement == null) {
-
-							try {
-								if (i % 35 == 0) {
-									WebElement seemore = getElementIfExists(driver,
-											"//a[normalize-space()='See more']");
-									if (seemore != null) {
-										seemore.click();
-										jobTitleElement = getElementIfExists(driver,
-												"(//div[@id='offer-body'])[" + i + "]/div/div/h3");
-									}
-
-									sleepRandom();
-								}
-							} catch (Exception e) {
-								System.out.println("inner break perforemed at " + i);
-								// takeScreenshot( driver,"error");
-								
-								 File screenshotFile = takeScreenshotGit(driver, "error");
-								 commitScreenshot(screenshotFile);
-								break;
+					if (TotalJobsOnPage.size() == i && i <= totalJobCount) {
+						int j = i - 2;
+						WebElement ScrollElement = getElementIfExists(driver,
+								"(//div[@id='offer-body'])[" + j + "]/div/div/h3");
+						if (ScrollElement != null) {
+							((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
+									ScrollElement);
+							WebElement seemore = getElementIfExists(driver, "//a[normalize-space()='See more']");
+							if (seemore != null) {
+								seemore.click();
+								sleepRandom();
 							}
-						}
-
-						if (i % 2 == 0 && i <= totalJobCount) {
-							
-							if (jobTitleElement != null) {
-								((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
-										jobTitleElement);
-							}
-						}
-
-		if ((isLessThanThreeDays(relativeTime))) {
-						
-						if (jobTitleElement != null) {
-							jobTitle = jobTitleElement.getText();
-						}
-
-						WebElement jobLinkElement = getElementIfExists(driver,
-								"(//div[@id='offer-body']/parent::div/preceding-sibling::a)[" + i + "]");
-
-						if (jobLinkElement != null) {
-							jobLinkElement.click();
-							sleepRandom();
-						}
-
-						List<String> tabs = new ArrayList<>(driver.getWindowHandles());
-
-						try {
-
-							driver.switchTo().window(tabs.get(1));
-							jobURL = driver.getCurrentUrl();
-
-							// Extract additional details
-							WebElement jobLocationElement = getElementIfExists(driver,
-									"//div[@id='offer_general_data']//span[contains(.,'Work from:')]/following-sibling::div");
-							if (jobLocationElement != null) {
-								jobLocation = jobLocationElement.getText();
-
-							}
-
-							WebElement companyNameElement = getElementIfExists(driver,
-									"//div[contains(@class,'flex justify-center')]/following-sibling::span[1]");
-							if (companyNameElement != null) {
-								companyName = companyNameElement.getText();
-							}
-
-							WebElement companyUrlElement = getElementIfExists(driver,
-									"//div[contains(@class,'flex justify-center')]/following-sibling::a");
-							if (companyUrlElement != null) {
-								companyWebsite = companyUrlElement.getAttribute("href");
-							}
-
-							WebElement companySizeElement = getElementIfExists(driver,
-									"//div[contains(@class,'flex justify-center')]/following-sibling::div//span");
-							if (companySizeElement != null) {
-								companySize = companySizeElement.getText();
-							}
-
-							dateCreated = LocalDateTime.now()
-									.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
-							List<String> validSizes = Arrays.asList("11 - 50", "2 - 10", "51 - 200");
-
-							// Add job details to the list
-							if (validSizes.contains(companySize)) {
-								jobDetailsList.add(new String[] { jobTitle, jobLocation, jobURL, companyName,
-										companySize, companyWebsite, source, dateCreated });
-							}
-						
-
-							// Close the job detail tab and switch back
-							driver.close();
-						} catch (Exception e) {
-							e.printStackTrace();
-							// takeScreenshot( driver,"error");
-							
-							 File screenshotFile = takeScreenshotGit(driver, "error");
-							 commitScreenshot(screenshotFile);
-						} finally {
-							driver.switchTo().window(tabs.get(0));
-						}
-		}
-
-						if (i % 35 == 0) {
-							try {
-								((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
-										driver.findElement(
-												By.xpath("(//div[@id='offer-body']/parent::div/preceding-sibling::a)["
-														+ i + "]")));
-							} finally {
-								WebElement seemore = getElementIfExists(driver, "//a[normalize-space()='See more']");
-								if (seemore != null) {
-									seemore.click();
-								}
-							}
-
-							sleepRandom();
-
 						}
 					}
 				} catch (Exception e) {
+					System.out.println("inner break perforemed at 'See more'" + i);
+					takeScreenshot(driver, "error", location);
 					e.printStackTrace();
-					
-					// takeScreenshot( driver,"error");
-					
-					 File screenshotFile = takeScreenshotGit(driver, "error");
-					 commitScreenshot(screenshotFile);
-					 
+					break;
+				}
+
+				WebElement jobTitleElement = getElementIfExists(driver,
+						"(//div[@id='offer-body'])[" + i + "]/div/div/h3");
+
+				if (i % 2 == 0 && i <= totalJobCount) {
+					int j = i - 1;
+					WebElement ScrollElement = getElementIfExists(driver,
+							"(//div[@id='offer-body'])[" + j + "]/div/div/h3");
+					if (jobTitleElement != null) {
+						((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
+								ScrollElement);
+					}
+				}
+
+				if (jobTitleElement == null) {
+					System.out.println("No jobs showing (or) Jobs list might be at the end ");
+					break;
+				}
+
+				String jobTitle = jobTitleElement.getText();
+
+				WebElement jobLinkElement = getElementIfExists(driver,
+						"(//div[@id='offer-body']/parent::div/preceding-sibling::a)[" + i + "]");
+
+				if (jobLinkElement != null) {
+					jobLinkElement.click();
+					sleepRandom();
+				}
+
+				List<String> tabs = new ArrayList<>(driver.getWindowHandles());
+
+				try {
+					driver.switchTo().window(tabs.get(1));
+					String jobURL = driver.getCurrentUrl();
+
+					WebElement jobLocationElement = getElementIfExists(driver,
+							"//div[@id='offer_general_data']//span[contains(.,'Work from:')]/following-sibling::div");
+					String jobLocation = jobLocationElement != null ? jobLocationElement.getText() : "";
+
+					WebElement companyNameElement = getElementIfExists(driver,
+							"//div[contains(@class,'flex justify-center')]/following-sibling::span[1]");
+					String companyName = companyNameElement != null ? companyNameElement.getText() : "";
+
+					WebElement companyUrlElement = getElementIfExists(driver,
+							"//div[contains(@class,'flex justify-center')]/following-sibling::a");
+					String companyWebsite = companyUrlElement != null ? companyUrlElement.getAttribute("href") : "";
+
+					WebElement companySizeElement = getElementIfExists(driver,
+							"//div[contains(@class,'flex justify-center')]/following-sibling::div//span");
+					String companySize = companySizeElement != null ? companySizeElement.getText() : "";
+
+					String dateCreated = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+					List<String> validSizes = Arrays.asList("11 - 50", "2 - 10", "51 - 200");
+
+					if (validSizes.contains(companySize)) {
+						jobDetailsList.add(new String[] { jobTitle, jobLocation, jobURL, companyName, companySize,
+								companyWebsite, source, dateCreated });
+					}
+
+				} catch (Exception e) {
+					e.printStackTrace();
+					takeScreenshot(driver, "error", location);
+
 					switch (location) {
 					case "622a65b4671f2c8b98fac83f":
 						System.out.println("Code Not executed completely for UK location.--" + source);
@@ -244,63 +196,58 @@ public class JobScrapping3 {
 						System.out.println("Code Not executed completely for AUSTRALIA location.--" + source);
 						break;
 					}
+				} finally {
+					driver.close();
+					driver.switchTo().window(tabs.get(0));
 				}
+
 			}
 
 		} catch (Exception e) {
-//			 takeScreenshot( driver,"error");
-			
-			 File screenshotFile = takeScreenshotGit(driver, "error");
-			 commitScreenshot(screenshotFile);
-			System.out.println("Code Not executed completely for -- " + source);
-
+			takeScreenshot(driver, "error", location);
 			e.printStackTrace();
 		} finally {
 			// SQL connection setup
-			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			String connectionURL = "jdbc:sqlserver://10.0.2.34:1433;Database=Automation;User=mailscan;Password=MailScan@343260;encrypt=true;trustServerCertificate=true";
-			connection = DriverManager.getConnection(connectionURL);
+			try {
+				Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+				String connectionURL = "jdbc:sqlserver://10.0.2.34:1433;Database=Automation;User=mailscan;Password=MailScan@343260;encrypt=true;trustServerCertificate=true";
+				connection = DriverManager.getConnection(connectionURL);
 
-			// SQL queries
-			String checkSQL = "SELECT COUNT(*) FROM JobListings WHERE jobUrl = ?";
-			ResultSet resultSet = null;
-			// Check and insert jobs into the database
-			String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocations, jobUrl, companyName, employeeCount, companyWebsite, source, dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-			for (String[] jobDetails : jobDetailsList) {
-				String jobURL = jobDetails[2];
+				// SQL queries
+				String checkSQL = "SELECT COUNT(*) FROM JobListings WHERE jobUrl = ?";
+				String insertSQL = "INSERT INTO JobListings (jobTitle, jobLocations, jobUrl, companyName, employeeCount, companyWebsite, source, dateCreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-				// Check if job URL already exists
-				PreparedStatement checkStatement = connection.prepareStatement(checkSQL);
-				checkStatement.setString(1, jobURL);
-				resultSet = checkStatement.executeQuery();
-				if (resultSet.next() && resultSet.getInt(1) == 0) {
-					// Insert new job listing
-					PreparedStatement insertStatement = connection.prepareStatement(insertSQL);
-					for (int j = 0; j < jobDetails.length; j++) {
-						insertStatement.setString(j + 1, jobDetails[j]);
+				for (String[] jobDetails : jobDetailsList) {
+					String jobURL = jobDetails[2];
+
+					PreparedStatement checkStatement = connection.prepareStatement(checkSQL);
+					checkStatement.setString(1, jobURL);
+					ResultSet resultSet = checkStatement.executeQuery();
+
+					if (resultSet.next() && resultSet.getInt(1) == 0) {
+						PreparedStatement insertStatement = connection.prepareStatement(insertSQL);
+						for (int j = 0; j < jobDetails.length; j++) {
+							insertStatement.setString(j + 1, jobDetails[j]);
+						}
+						insertStatement.executeUpdate();
+						insertStatement.close();
 					}
-					insertStatement.executeUpdate();
-					insertStatement.close();
-					totalJobsAppended++;
+
+					resultSet.close();
+					checkStatement.close();
 				}
-				resultSet.close();
-				checkStatement.close();
-			}
-			if (totalJobsAppended != 0) {
-				System.out.println(totalJobsAppended + " jobs added to DB. --" + source);
-			} else {
-				System.out.println("No new jobs found.--" + source);
-			}
-
-			if (driver != null) {
-				driver.quit();
-			}
-			if (connection != null) {
-				try {
-					connection.close();
-				} catch (Exception e) {
-					e.printStackTrace();
-
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				if (connection != null) {
+					try {
+						connection.close();
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
+				}
+				if (driver != null) {
+					driver.quit();
 				}
 			}
 		}
@@ -308,16 +255,25 @@ public class JobScrapping3 {
 
 	private static WebElement getElementIfExists(WebDriver driver, String xpath) {
 		try {
-			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 			return wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpath)));
 		} catch (Exception e) {
 			return null;
 		}
 	}
 
+	private static List<WebElement> getElementsIfExists(WebDriver driver, String xpath) {
+		try {
+			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+			return wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpath)));
+		} catch (Exception e) {
+			return Collections.emptyList();
+		}
+	}
+
 	private static void sleepRandom() {
 		try {
-			int delay = new Random().nextInt(2000) + 1000; // Delay between 1 and 2 seconds
+			int delay = new Random().nextInt(2000) + 1000;
 			Thread.sleep(delay);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
@@ -326,85 +282,47 @@ public class JobScrapping3 {
 
 	private static void handlePopUp(WebDriver driver) {
 		try {
-			String source = "jobgether.com";
-			// Check if the pop-up exists
 			WebElement closeButton = getElementIfExists(driver, "//button[@data-pc-section='closebutton']");
 			if (closeButton != null) {
 				closeButton.click();
-				System.out.println("pop-up closed. --" + source);
+				System.out.println("Pop-up closed.");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	private static void takeScreenshot(WebDriver driver, String fileName) {
+	private static void takeScreenshot(WebDriver driver, String fileName, String location) {
+
 		try {
+
+			String source = "jobtogrther.com";
+
 			TakesScreenshot ts = (TakesScreenshot) driver;
-			File source = ts.getScreenshotAs(OutputType.FILE);
+			File sources = ts.getScreenshotAs(OutputType.FILE);
 			String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
 			File destination = new File("C:/Users/svegi/eclipse-workspace/WebScrapers/ExtendReports/screenshots/"
 					+ fileName + "_" + timestamp + ".png");
-			FileUtils.copyFile(source, destination);
-			System.out.println("Screenshot taken: " + destination.getPath());
+			FileUtils.copyFile(sources, destination);
+			System.out.println("Screenshot taken in  :" + destination.getPath());
+
+			switch (location) {
+			case "622a65b4671f2c8b98fac83f":
+				System.out.println("Code Not executed completely for UK location.--" + source);
+				break;
+			case "622a65bd671f2c8b98faca1a":
+				System.out.println("Code Not executed completely for USA location.--" + source);
+				break;
+			case "622a659af0bac38678ed1398":
+				System.out.println("Code Not executed completely for EUROPE location.--" + source);
+				break;
+			case "622a65b0671f2c8b98fac759":
+				System.out.println("Code Not executed completely for AUSTRALIA location.--" + source);
+				break;
+			}
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	 private static File takeScreenshotGit(WebDriver driver, String fileName) {
-	        File screenshotFile = null;
-	        try {
-	            TakesScreenshot ts = (TakesScreenshot) driver;
-	            screenshotFile = ts.getScreenshotAs(OutputType.FILE);
-	            String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
-	            
-	            // Modify this path to your Git folder path
-	            File destination = new File("ExtendReports/screenshots"
-	                    + fileName + "_" + timestamp + ".png");
-	            
-	            FileUtils.copyFile(screenshotFile, destination);
-	            System.out.println("Screenshot taken: " + destination.getPath());
-	            
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-	        return screenshotFile;
-	    }
-
-	 private static void commitScreenshot(File screenshotFile) {
-		    try {
-		        String command = "cmd /c git add \"" + screenshotFile.getPath() + "\" && " +
-		                         "git commit -m \"Added screenshot for error\" && " +
-		                         "git push";
-		        
-		        // Run the command in the terminal
-		        Process process = Runtime.getRuntime().exec(command);
-		        process.waitFor(); // Wait for the process to finish
-		        
-		        // Optional: Check if there are any errors in the output
-		        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-		        String line;
-		        while ((line = reader.readLine()) != null) {
-		            System.out.println(line);
-		        }
-		        
-		    } catch (IOException | InterruptedException e) {
-		        e.printStackTrace();
-		    }
-		}
-	 
-	 private static boolean isLessThanThreeDays(String relativeTime) {
-			if (relativeTime.contains("day ago")||relativeTime.contains("Today")) {
-				return true; // If it contains minute or second, it is within 3 days
-			} else if (relativeTime.contains("days ago")) {
-				String[] parts = relativeTime.split(" ");
-				int days = Integer.parseInt(parts[0]); // Get the number of days
-				return days < 10; // Check if it's less than 3 days
-			}
-			return false; // Default case, if not matched
-		}
-		
-
-
 }

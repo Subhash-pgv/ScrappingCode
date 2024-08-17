@@ -13,10 +13,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.interactions.Actions;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -26,9 +24,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Random;
 
 public class JobScrapping1 {
@@ -129,10 +125,8 @@ public class JobScrapping1 {
 			System.out.println("Code did not execute completely.-- "+source);
 			e.printStackTrace();
 
-			// takeScreenshot( driver,"error");
+			 takeScreenshot( driver,"error");
 			
-			 File screenshotFile = takeScreenshotGit(driver, "error");
-			 commitScreenshot(screenshotFile);
 		} finally {
 			
 			try {
@@ -257,54 +251,12 @@ public class JobScrapping1 {
 			TakesScreenshot ts = (TakesScreenshot) driver;
 			File source = ts.getScreenshotAs(OutputType.FILE);
 			String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
-			File destination = new File("C:/Users/svegi/eclipse-workspace/WebScrapers/ExtendReports/screenshots/"
+			File destination = new File("C:/Users/user01/Desktop/Automation Scrapping Code Error Screenshots/"
 					+ fileName + "_" + timestamp + ".png");
 			FileUtils.copyFile(source, destination);
-			System.out.println("Screenshot taken: " + destination.getPath());
+			System.out.println("Screenshot taken in "+source+" :" + destination.getPath());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	   private static File takeScreenshotGit(WebDriver driver, String fileName) {
-	        File screenshotFile = null;
-	        try {
-	            TakesScreenshot ts = (TakesScreenshot) driver;
-	            screenshotFile = ts.getScreenshotAs(OutputType.FILE);
-	            String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
-	            
-	            // Modify this path to your Git folder path
-	            File destination = new File("ExtendReports/screenshots"
-	                    + fileName + "_" + timestamp + ".png");
-	            
-	            FileUtils.copyFile(screenshotFile, destination);
-	            System.out.println("Screenshot taken: " + destination.getPath());
-	            
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-	        return screenshotFile;
-	    }
-
-	   private static void commitScreenshot(File screenshotFile) {
-		    try {
-		        String command = "cmd /c git add \"" + screenshotFile.getPath() + "\" && " +
-		                         "git commit -m \"Added screenshot for error\" && " +
-		                         "git push";
-		        
-		        // Run the command in the terminal
-		        Process process = Runtime.getRuntime().exec(command);
-		        process.waitFor(); // Wait for the process to finish
-		        
-		        // Optional: Check if there are any errors in the output
-		        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-		        String line;
-		        while ((line = reader.readLine()) != null) {
-		            System.out.println(line);
-		        }
-		        
-		    } catch (IOException | InterruptedException e) {
-		        e.printStackTrace();
-		    }
-		}
 }

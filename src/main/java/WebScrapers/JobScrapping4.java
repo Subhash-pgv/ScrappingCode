@@ -11,25 +11,25 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.interactions.Actions;
+
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.text.NumberFormat;
-import java.io.BufferedReader;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.NoSuchElementException;
+
 import java.util.Random;
 
 public class JobScrapping4 {
@@ -66,10 +66,7 @@ public class JobScrapping4 {
 
 			} catch (Exception e) {
 				e.printStackTrace();
-				// takeScreenshot( driver,"error");
-				
-				 File screenshotFile = takeScreenshotGit(driver, "error");
-				 commitScreenshot(screenshotFile);
+				 takeScreenshot( driver,"error");
 			}
 
 			for (int i = 1; i <= totalJobCount; i++) {
@@ -84,8 +81,7 @@ public class JobScrapping4 {
 
 				System.out.println("looking Job " + i + " from " + source + " please wait until it shows completed.....");
 
-				WebElement jobTitleElement = getElementIfExists(driver,
-						"(//div[@class='job-cols']//h4[1]//a)[" + i + "]");
+				WebElement jobTitleElement = getElementIfExists(driver,"(//div[@class='job-cols']//h4[1]//a)[" + i + "]");
 				// Make webelement on focus
 				if (i % 2 == 0) {
 					int j = i - 1;
@@ -93,22 +89,7 @@ public class JobScrapping4 {
 							driver.findElement(By.xpath("(//div[@class='job-cols']//h4/a)[" + j + "]")));
 				}
 
-				String relativeTime = "";
-				String featured ="";
-				WebElement dateElement = getElementIfExists(driver,
-						"(//div[@ng-show='!job._source.premium' and contains(@class, 'date')])["+ i +"]");
-				
-				WebElement featuredElement = getElementIfExists(driver,
-						"(//div[normalize-space()='Featured'])["+ i +"]");
-				if (featuredElement != null) {
-					featured = featuredElement.getText();
-				}
-				
-				if (dateElement != null) {
-					relativeTime = dateElement.getText();
-				}
-
-				if ((isLessThanThreeDays(relativeTime))||featured!="Featured"||i%40==0) {
+				if (i%40==0) {
 
 					if (jobTitleElement != null) {
 						jobTitle = jobTitleElement.getText();
@@ -161,7 +142,10 @@ public class JobScrapping4 {
 						driver.close();
 						driver.switchTo().window(tabs.get(0));
 					}
-					if (i % 50 == 0) {
+					
+					List<WebElement> TotalJobsOnPage = getElementsIfExists(driver,"(//div[@class='job-cols']//h4[1]//a)");
+					if (TotalJobsOnPage.size() == i) {
+						
 
 						driver.findElement(By.xpath("//div[@class='show-more']")).click();
 					}
@@ -169,10 +153,8 @@ public class JobScrapping4 {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			// takeScreenshot( driver,"error");
-			
-			 File screenshotFile = takeScreenshotGit(driver, "error");
-			 commitScreenshot(screenshotFile);
+			 takeScreenshot( driver,"error");
+
 		} finally {
 
 			try {
@@ -240,6 +222,15 @@ public class JobScrapping4 {
 			return null;
 		}
 	}
+	
+	private static List<WebElement> getElementsIfExists(WebDriver driver, String xpath) {
+	    try {
+	        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+	        return wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(xpath)));
+	    } catch (Exception e) {
+	        return Collections.emptyList(); // Return an empty list if elements are not found or any exception occurs
+	    }
+	}
 
 	private static void sleepRandom() {
 		try {
@@ -250,70 +241,18 @@ public class JobScrapping4 {
 		}
 	}
 
-	private static boolean isLessThanThreeDays(String relativeTime) {
-		if (relativeTime.contains("minute") || relativeTime.contains("seconds") || relativeTime.contains("hour")) {
-			return true; // If it contains minute or second, it is within 3 days
-		} else if (relativeTime.contains("day")) {
-			String[] parts = relativeTime.split(" ");
-			int days = Integer.parseInt(parts[0]); // Get the number of days
-			return days < 3; // Check if it's less than 3 days
-		}
-		return false; // Default case, if not matched
-	}
-	
 	private static void takeScreenshot(WebDriver driver, String fileName) {
 		try {
 			TakesScreenshot ts = (TakesScreenshot) driver;
 			File source = ts.getScreenshotAs(OutputType.FILE);
 			String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
-			File destination = new File("C:/Users/svegi/eclipse-workspace/WebScrapers/ExtendReports/screenshots/"
+			File destination = new File("C:/Users/user01/Desktop/Automation Scrapping Code Error Screenshots/"
 					+ fileName + "_" + timestamp + ".png");
 			FileUtils.copyFile(source, destination);
-			System.out.println("Screenshot taken: " + destination.getPath());
+			System.out.println("Screenshot taken in "+source+" :" + destination.getPath());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	 private static File takeScreenshotGit(WebDriver driver, String fileName) {
-	        File screenshotFile = null;
-	        try {
-	            TakesScreenshot ts = (TakesScreenshot) driver;
-	            screenshotFile = ts.getScreenshotAs(OutputType.FILE);
-	            String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
-	            
-	            // Modify this path to your Git folder path
-	            File destination = new File("C:/Users/svegi/eclipse-workspace/WebScrapers/ExtendReports/screenshots/"
-	                    + fileName + "_" + timestamp + ".png");
-	            
-	            FileUtils.copyFile(screenshotFile, destination);
-	            System.out.println("Screenshot taken: " + destination.getPath());
-	            
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-	        return screenshotFile;
-	    }
-
-	 private static void commitScreenshot(File screenshotFile) {
-		    try {
-		        String command = "cmd /c git add \"" + screenshotFile.getPath() + "\" && " +
-		                         "git commit -m \"Added screenshot for error\" && " +
-		                         "git push";
-		        
-		        // Run the command in the terminal
-		        Process process = Runtime.getRuntime().exec(command);
-		        process.waitFor(); // Wait for the process to finish
-		        
-		        // Optional: Check if there are any errors in the output
-		        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-		        String line;
-		        while ((line = reader.readLine()) != null) {
-		            System.out.println(line);
-		        }
-		        
-		    } catch (IOException | InterruptedException e) {
-		        e.printStackTrace();
-		    }
-		}
 }
