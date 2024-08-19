@@ -34,14 +34,11 @@ import java.io.IOException;
 
 public class JobScrapping3 {
 
-	private static final String[] LOCATIONS = { 
-			"622a659af0bac38678ed1398", // Europe
-			"622a65b0671f2c8b98fac759", // Australia
-			"622a65b4671f2c8b98fac83f", // UK
-			"622a65bd671f2c8b98faca1a" // USA
-	};
+	private static final String[] LOCATIONS = { "Europe", "Australia", "UK", "USA" };
 
 	public static void main(String[] args) throws SQLException, ClassNotFoundException {
+		System.out.println("ADDING JOBS FROM  \"jobgether.com\"");
+
 		// Create a thread pool with a fixed number of threads, one for each location
 		ExecutorService executor = Executors.newFixedThreadPool(LOCATIONS.length);
 
@@ -57,7 +54,7 @@ public class JobScrapping3 {
 
 class JobScraperTask1 implements Runnable {
 
-	private String location;
+	private String location = null;
 
 	public JobScraperTask1(String location) {
 		this.location = location;
@@ -69,16 +66,27 @@ class JobScraperTask1 implements Runnable {
 		Connection connection = null;
 		List<String[]> jobDetailsList = new ArrayList<>();
 		String source = "jobgether.com";
-
+		int totalJobsAppended = 0;
 		try {
 			ChromeOptions options = new ChromeOptions();
-            options.addArguments("--headless");
-            options.addArguments("--window-size=1920x1080");
-            options.addArguments("--disable-gpu");
+			options.addArguments("--headless");
+			options.addArguments("--window-size=1920x1080");
+			options.addArguments("--disable-gpu");
 			driver = new ChromeDriver(options);
 
-			driver.get("https://jobgether.com/search-offers?locations=" + location
-					+ "&industries=62448b478cb2bb9b3540b791&industries=62448b478cb2bb9b3540b78f&sort=date");
+			if (location == "USA") {
+				driver.get(
+						"https://jobgether.com/search-offers?locations=622a65bd671f2c8b98faca1a&industries=62448b478cb2bb9b3540b791&industries=62448b478cb2bb9b3540b78f&sort=date");
+			} else if (location == "UK") {
+				driver.get(
+						"https://jobgether.com/search-offers?locations=622a65b4671f2c8b98fac83f&industries=62448b478cb2bb9b3540b791&industries=62448b478cb2bb9b3540b78f&sort=date");
+			} else if (location == "Australia") {
+				driver.get(
+						"https://jobgether.com/search-offers?locations=622a65b0671f2c8b98fac759&industries=62448b478cb2bb9b3540b791&industries=62448b478cb2bb9b3540b78f&sort=date");
+			} else if (location == "Europe") {
+				driver.get(
+						"https://jobgether.com/search-offers?locations=622a659af0bac38678ed1398&industries=62448b478cb2bb9b3540b791&industries=62448b478cb2bb9b3540b78f&sort=date");
+			}
 			driver.manage().window().maximize();
 
 			Thread.sleep(8000);
@@ -92,7 +100,8 @@ class JobScraperTask1 implements Runnable {
 
 			for (int i = 1; i <= totalJobCount; i++) {
 
-				System.out.println("Adding Jobs for \"" + source + "\" please wait until it shows completed.....");
+				System.out.println(
+						"Adding Jobs for \"" + source + "\" please wait until it shows completed....." + location);
 
 				try {
 					List<WebElement> TotalJobsOnPage = getElementsIfExists(driver,
@@ -113,7 +122,7 @@ class JobScraperTask1 implements Runnable {
 						}
 					}
 				} catch (Exception e) {
-					System.out.println("inner break perforemed at 'See more'" + i);
+					System.out.println("inner break perforemed at 'See more'" + i + location);
 					takeScreenshot(driver, "error", location);
 					e.printStackTrace();
 					break;
@@ -133,7 +142,7 @@ class JobScraperTask1 implements Runnable {
 				}
 
 				if (jobTitleElement == null) {
-					System.out.println("No jobs showing (or) Jobs list might be at the end ");
+					System.out.println("No jobs showing (or) Jobs list might be at the end -- " + location);
 					break;
 				}
 
@@ -179,23 +188,9 @@ class JobScraperTask1 implements Runnable {
 					}
 
 				} catch (Exception e) {
-					e.printStackTrace();
 					takeScreenshot(driver, "error", location);
-
-					switch (location) {
-					case "622a65b4671f2c8b98fac83f":
-						System.out.println("Code Not executed completely for UK location.--" + source);
-						break;
-					case "622a65bd671f2c8b98faca1a":
-						System.out.println("Code Not executed completely for USA location.--" + source);
-						break;
-					case "622a659af0bac38678ed1398":
-						System.out.println("Code Not executed completely for EUROPE location.--" + source);
-						break;
-					case "622a65b0671f2c8b98fac759":
-						System.out.println("Code Not executed completely for AUSTRALIA location.--" + source);
-						break;
-					}
+					e.printStackTrace();
+					System.out.println("Code Not executed completely for " + location + "--" + source);
 				} finally {
 					driver.close();
 					driver.switchTo().window(tabs.get(0));
@@ -206,6 +201,9 @@ class JobScraperTask1 implements Runnable {
 		} catch (Exception e) {
 			takeScreenshot(driver, "error", location);
 			e.printStackTrace();
+			if (driver != null) {
+				driver.quit();
+			}
 		} finally {
 			// SQL connection setup
 			try {
@@ -231,14 +229,24 @@ class JobScraperTask1 implements Runnable {
 						}
 						insertStatement.executeUpdate();
 						insertStatement.close();
+
+						totalJobsAppended++;
 					}
 
 					resultSet.close();
 					checkStatement.close();
+
+				}
+
+				if (totalJobsAppended > 0) {
+					System.out.println(totalJobsAppended + " jobs added to DB successfully.--" + source);
+				} else {
+					System.out.println("No new jobs found.--" + source);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {
+				System.out.println(location + " : " + totalJobsAppended);
 				if (connection != null) {
 					try {
 						connection.close();
@@ -304,22 +312,7 @@ class JobScraperTask1 implements Runnable {
 			File destination = new File("C:/Users/user01/Desktop/Automation Scrapping Code Error Screenshots/"
 					+ fileName + "_" + timestamp + ".png");
 			FileUtils.copyFile(sources, destination);
-			System.out.println("Screenshot taken in  :" + destination.getPath());
-
-			switch (location) {
-			case "622a65b4671f2c8b98fac83f":
-				System.out.println("Code Not executed completely for UK location.--" + source);
-				break;
-			case "622a65bd671f2c8b98faca1a":
-				System.out.println("Code Not executed completely for USA location.--" + source);
-				break;
-			case "622a659af0bac38678ed1398":
-				System.out.println("Code Not executed completely for EUROPE location.--" + source);
-				break;
-			case "622a65b0671f2c8b98fac759":
-				System.out.println("Code Not executed completely for AUSTRALIA location.--" + source);
-				break;
-			}
+			System.out.println("Screenshot taken in "+sources+" :" + location+ " :" + destination.getPath());
 
 		} catch (IOException e) {
 			e.printStackTrace();

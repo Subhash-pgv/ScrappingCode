@@ -33,13 +33,14 @@ import java.util.Locale;
 import java.util.Random;
 
 public class JobScrapping4 {
+	 static String sources = null;
 	public static void main(String[] args) {
 		WebDriver driver = null;
 		Connection connection = null;
 
 		List<String[]> jobDetailsList = new ArrayList<>();
 		int totalJobsAppended = 0;
-		String source = null;
+		
 		try {
 			ChromeOptions options = new ChromeOptions();
 			options.addArguments("--headless");
@@ -63,6 +64,7 @@ public class JobScrapping4 {
 			try {
 				Number number = format.parse(parts);
 				totalJobCount = number.intValue();
+				System.out.println("Total Job count for workingnomads.com is "+totalJobCount );
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -75,11 +77,17 @@ public class JobScrapping4 {
 				String jobLocation = "";
 				String jobURL = "";
 				String companyWebsite = "";
-				source = "workingnomads.com";
+				sources = "workingnomads.com";
 				String employeeCount = "";
 				String dateCreated = "";
 
-				System.out.println("looking Job " + i + " from " + source + " please wait until it shows completed.....");
+				System.out.println("looking Job " + i + " from " + sources + " please wait until it shows completed.....");
+				
+				List<WebElement> TotalJobsOnPage = getElementsIfExists(driver,"(//div[@class='job-cols']//h4[1]//a)");
+				if (TotalJobsOnPage.size() == i) {
+
+					driver.findElement(By.xpath("//div[@class='show-more']")).click();
+				}
 
 				WebElement jobTitleElement = getElementIfExists(driver,"(//div[@class='job-cols']//h4[1]//a)[" + i + "]");
 				// Make webelement on focus
@@ -88,8 +96,6 @@ public class JobScrapping4 {
 					((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
 							driver.findElement(By.xpath("(//div[@class='job-cols']//h4/a)[" + j + "]")));
 				}
-
-				if (i%40==0) {
 
 					if (jobTitleElement != null) {
 						jobTitle = jobTitleElement.getText();
@@ -137,19 +143,11 @@ public class JobScrapping4 {
 						dateCreated = now.format(formatter);
 
 						jobDetailsList.add(new String[] { jobTitle, jobLocation, jobURL, companyName, employeeCount,
-								companyWebsite, source, dateCreated });
+								companyWebsite, sources, dateCreated });
 
 						driver.close();
 						driver.switchTo().window(tabs.get(0));
 					}
-					
-					List<WebElement> TotalJobsOnPage = getElementsIfExists(driver,"(//div[@class='job-cols']//h4[1]//a)");
-					if (TotalJobsOnPage.size() == i) {
-						
-
-						driver.findElement(By.xpath("//div[@class='show-more']")).click();
-					}
-				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -191,13 +189,13 @@ public class JobScrapping4 {
 				// Summary of results
 
 				if (totalJobsAppended > 0) {
-					System.out.println(totalJobsAppended + " jobs added to DB successfully.--" + source);
+					System.out.println(totalJobsAppended + " jobs added to DB successfully.--" + sources);
 				} else {
-					System.out.println("No new jobs found.--" + source);
+					System.out.println("No new jobs found.--" + sources);
 				}
 
 			} catch (Exception e) {
-				System.out.println("Error in Jobs adding to data base. -- " + source);
+				System.out.println("Error in Jobs adding to data base. -- " + sources);
 				e.printStackTrace();
 			}
 
@@ -246,10 +244,10 @@ public class JobScrapping4 {
 			TakesScreenshot ts = (TakesScreenshot) driver;
 			File source = ts.getScreenshotAs(OutputType.FILE);
 			String timestamp = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss").format(LocalDateTime.now());
-			File destination = new File("C:/Users/user01/Desktop/Automation Scrapping Code Error Screenshots/"
+			File destination = new File("C:/Users/svegi/eclipse-workspace/WebScrapers/ExtendReports/screenshots/"
 					+ fileName + "_" + timestamp + ".png");
 			FileUtils.copyFile(source, destination);
-			System.out.println("Screenshot taken in "+source+" :" + destination.getPath());
+			System.out.println("Screenshot taken in "+sources+" :" + destination.getPath());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

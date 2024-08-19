@@ -26,6 +26,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class JobScrapping2 {
+	
+	static String sources=null;
     public static void main(String[] args) throws IOException, InterruptedException, SQLException, ClassNotFoundException {
 
         ChromeOptions options = new ChromeOptions();
@@ -41,7 +43,7 @@ public class JobScrapping2 {
         sleepRandom();
         System.out.println("ADDING JOBS FROM \"weworkremotely.com\"");
         
-        String source=null;
+        
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         
@@ -70,7 +72,7 @@ public class JobScrapping2 {
             String jobURL = null;
             String employeeCount="1-50";
             String companyWebsite= null;
-            source= "weworkremotely.com";
+            sources= "weworkremotely.com";
             String dateCreated = null;
             
             String viewAll=null;
@@ -108,7 +110,7 @@ public class JobScrapping2 {
    
         	for (int i = 1; i <= resultCountElement.size(); i++) {
         		
-        		System.out.println("Adding Jobs for "+source +" please wait until it shows completed.....");
+        		System.out.println("Adding Jobs for "+sources +" please wait until it shows completed.....");
         		
         		((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",driver.findElement(By.xpath("(//section[@id='category-" + sectionId + "']//li/a//span[@class='title'])[" + i + "]")));
 
@@ -151,7 +153,7 @@ public class JobScrapping2 {
 				dateCreated = now.format(formatter);
                 
 				jobDetailsList.add(new String[] {jobTitle, jobLocation, jobURL, companyName, employeeCount,
-						companyWebsite, source, dateCreated});
+						companyWebsite, sources, dateCreated});
 				
 				totalJobFinds++;
 				
@@ -163,7 +165,7 @@ public class JobScrapping2 {
         }
         
         }catch(Exception e) {
-        	System.out.println("Code did not execute completely.-- "+source);
+        	System.out.println("Code did not execute completely.-- "+sources);
 			e.printStackTrace();
 			
 			 takeScreenshot( driver,"error");
@@ -205,13 +207,13 @@ public class JobScrapping2 {
 
 				
 				 if (totalJobCount == totalJobFinds) {
-			            System.out.println("Searched all companies for new jobs.-- "+source);
+			            System.out.println("Searched all companies for new jobs.-- "+sources);
 			        }
 				 
 				if (totalJobsAppended > 0) {
-					System.out.println(totalJobsAppended + " jobs added to DB successfully. -"+source);
+					System.out.println(totalJobsAppended + " jobs added to DB successfully. -"+sources);
 				} else {
-					System.out.println("No new jobs found.-- "+source);
+					System.out.println("No new jobs found.-- "+sources);
 				}
 				if (driver != null) {
 					driver.quit();
@@ -226,7 +228,7 @@ public class JobScrapping2 {
 
 			} catch (Exception e) {
 				
-				System.out.println("Error in Jobs adding to data base - "+source);
+				System.out.println("Error in Jobs adding to data base - "+sources);
 				e.printStackTrace();
 			}
         	
@@ -264,7 +266,7 @@ public class JobScrapping2 {
 			File destination = new File("C:/Users/user01/Desktop/Automation Scrapping Code Error Screenshots/"
 					+ fileName + "_" + timestamp + ".png");
 			FileUtils.copyFile(source, destination);
-			System.out.println("Screenshot taken in "+source+" :" + destination.getPath());
+			System.out.println("Screenshot taken in "+sources+" :" + destination.getPath());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
