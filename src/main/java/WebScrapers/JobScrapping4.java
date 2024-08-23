@@ -94,7 +94,7 @@ public class JobScrapping4 {
 				if (i % 2 == 0) {
 					int j = i - 1;
 					((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);",
-							driver.findElement(By.xpath("(//div[@class='job-cols']//h4/a)[" + j + "]")));
+							driver.findElement(By.xpath("(//div[@class='job-cols']//h4[1]/a)[" + j + "]")));
 				}
 
 					if (jobTitleElement != null) {
