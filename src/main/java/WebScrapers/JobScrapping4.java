@@ -157,7 +157,7 @@ public class JobScrapping4 {
 
 			try {
 				Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-				String connectionURL = "jdbc:sqlserver://10.0.2.34:1433;Database=Automation;User=mailscan;Password=MailScan@343260;encrypt=true;trustServerCertificate=true";
+				String connectionURL = "***enter yout local data base connection string*** ";
 				connection = DriverManager.getConnection(connectionURL);
 
 				// SQL queries
